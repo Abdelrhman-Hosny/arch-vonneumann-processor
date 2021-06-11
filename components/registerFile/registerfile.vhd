@@ -8,7 +8,6 @@ USE IEEE.numeric_std.all;
 entity registerfile is
   port (
     CLK               : IN std_logic;
-    RST               : IN std_logic;
     write_enable      : IN std_logic;
 
     -- read addresses
@@ -31,7 +30,7 @@ architecture arch of registerfile is
 Component My_nDFF_RegFile IS
 	Generic (n: integer );
 	PORT(
-	  CLK,RST,W_Enable: IN STD_LOGIC ;
+	  CLK,W_Enable: IN STD_LOGIC ;
 					D : IN STD_LOGIC_VECTOR(n-1 downto 0) ;
 					Q : OUT STD_LOGIC_VECTOR(n-1 downto 0)
 		);
@@ -75,14 +74,14 @@ decoder0: My_3x8Decoder port map (write_address,write_address_decoded);
 
 
 -- PORT MAPPING THE 8 Registers
-R0:My_nDFF_RegFile generic map(32) port map(CLK,RST,write_address_decoded(0),write_register,R0_OUT);
-R1:My_nDFF_RegFile generic map(32) port map(CLK,RST,write_address_decoded(1),write_register,R1_OUT);
-R2:My_nDFF_RegFile generic map(32) port map(CLK,RST,write_address_decoded(2),write_register,R2_OUT);
-R3:My_nDFF_RegFile generic map(32) port map(CLK,RST,write_address_decoded(3),write_register,R3_OUT);
-R4:My_nDFF_RegFile generic map(32) port map(CLK,RST,write_address_decoded(4),write_register,R4_OUT);
-R5:My_nDFF_RegFile generic map(32) port map(CLK,RST,write_address_decoded(5),write_register,R5_OUT);
-R6:My_nDFF_RegFile generic map(32) port map(CLK,RST,write_address_decoded(6),write_register,R6_OUT);
-R7:My_nDFF_RegFile generic map(32) port map(CLK,RST,write_address_decoded(7),write_register,R7_OUT);
+R0:My_nDFF_RegFile generic map(32) port map(CLK,write_address_decoded(0),write_register,R0_OUT);
+R1:My_nDFF_RegFile generic map(32) port map(CLK,write_address_decoded(1),write_register,R1_OUT);
+R2:My_nDFF_RegFile generic map(32) port map(CLK,write_address_decoded(2),write_register,R2_OUT);
+R3:My_nDFF_RegFile generic map(32) port map(CLK,write_address_decoded(3),write_register,R3_OUT);
+R4:My_nDFF_RegFile generic map(32) port map(CLK,write_address_decoded(4),write_register,R4_OUT);
+R5:My_nDFF_RegFile generic map(32) port map(CLK,write_address_decoded(5),write_register,R5_OUT);
+R6:My_nDFF_RegFile generic map(32) port map(CLK,write_address_decoded(6),write_register,R6_OUT);
+R7:My_nDFF_RegFile generic map(32) port map(CLK,write_address_decoded(7),write_register,R7_OUT);
 
 
 

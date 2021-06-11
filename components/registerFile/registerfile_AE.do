@@ -11,7 +11,6 @@ vsim -gui work.registerfile
 # Loading work.mux8x1registerfile(arch)
 add wave -position insertpoint  \
 sim:/registerfile/CLK \
-sim:/registerfile/RST \
 sim:/registerfile/write_enable \
 sim:/registerfile/read_register1_address \
 sim:/registerfile/read_register2_address \

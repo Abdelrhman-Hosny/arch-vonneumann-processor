@@ -27,7 +27,6 @@ begin
               s_input1 OR s_input2 when i_opCode="0001" else
               NOT s_input1 when i_opCode="0010" else
               -- DEC
-<<<<<<< HEAD
               std_logic_vector(
                 to_signed(
                   to_integer( unsigned( i_operand1 )) - 1
@@ -51,19 +50,6 @@ begin
                 to_signed(
                   to_integer( unsigned( i_operand1 )) + 1
                   , 33)) when i_opCode="0110" else
-=======
-              std_logic_vector(to_signed(to_integer(unsigned(s_input1)) -1 ,33) ) when i_opCode="0011" else
-              -- ADD
-              std_logic_vector (to_signed(
-                to_integer(unsigned(s_input1)) + to_integer(unsigned(s_input2))
-              ,33))   when i_opCode="0100" else
-              -- SUB
-              std_logic_vector (to_signed(
-                to_integer(unsigned(s_input1)) - to_integer(unsigned(s_input2))
-              ,33))   when i_opCode="0101" else
-              -- INC 
-              std_logic_vector(to_signed(to_integer(unsigned(s_input1)) +1 ,33) ) when i_opCode="0110" else
->>>>>>> 22a81336c858ba49b9ad44e0f9a9c640210826e4
               --SHR 
               '0' & std_logic_vector(
                 shift_right(unsigned(i_operand1), to_integer(unsigned(i_shiftAmount)))

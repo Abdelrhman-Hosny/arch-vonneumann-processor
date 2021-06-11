@@ -24,4 +24,3 @@ force -freeze sim:/ram/address 50 0
 run
 force -freeze sim:/ram/address 3d1 0
 run
-quit -sim

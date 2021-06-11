@@ -6,7 +6,7 @@ vsim -gui work.ram
 # Loading ieee.std_logic_1164(body)
 # Loading ieee.numeric_std(body)
 # Loading work.ram(sync_ram_a)
-mem load -skip 0 -filltype inc -filldata 0 -fillradix symbolic -startaddress 0 -endaddress 1000 /ram/ram
+mem load -skip 0 -filltype inc -filldata 0 -fillradix symbolic -startaddress 0 -endaddress 1024 /ram/ram
 add wave -position insertpoint  \
 sim:/ram/address \
 sim:/ram/dataout \

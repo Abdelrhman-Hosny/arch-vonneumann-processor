@@ -15,9 +15,9 @@ END ENTITY ram;
 
 ARCHITECTURE sync_ram_a OF ram IS 
 -- SIZE WILL BE RELATIVE TO PC (NOW 16 BITS)
---1/2 * 2^16 = 32768
+-- 1/2 * 2^16 = 32768
 -- 1000 as program crash
-	TYPE ram_type IS ARRAY(0 TO 1000) of std_logic_vector(15 DOWNTO 0);
+	TYPE ram_type IS ARRAY(0 TO 1024) of std_logic_vector(15 DOWNTO 0);
 	SIGNAL ram : ram_type ;
 BEGIN
 	o_dataout <= ram(to_integer(unsigned((i_address))));

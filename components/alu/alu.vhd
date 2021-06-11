@@ -19,7 +19,6 @@ architecture arch of  ALU is
 Signal s_tempOutput : STD_LOGIC_VECTOR (32 downto 0);
 Signal s_input1 : STD_LOGIC_VECTOR (32 downto 0);
 Signal s_input2 : STD_LOGIC_VECTOR (32 downto 0);
-Signal s_shiftamount : integer;
 
 begin
   s_input1 <= '0'& i_operand1 ;
@@ -29,17 +28,29 @@ begin
               s_input1 OR s_input2 when i_opCode="0001" else
               NOT s_input1 when i_opCode="0010" else
               -- DEC
-              std_logic_vector(to_unsigned(to_integer(to_unsigned(s_input1)) -1)) when i_opCode="0011" else
+              std_logic_vector(
+                to_signed(
+                  to_integer( unsigned( i_operand1 )) - 1
+                  , 33)) when i_opCode="0011" else
               -- ADD
-              std_logic_vector (
-                to_integer(unsigned(s_input1)) + to_integer(unsigned(s_input2))
-                )   when i_opCode="0100" else
+              std_logic_vector(
+                to_signed(
+                  to_integer( unsigned( s_input1 ))
+                 +
+                  to_integer( unsigned( s_input2 ))
+                  , 33))   when i_opCode="0100" else
               -- SUB
-              std_logic_vector (
-                to_integer(unsigned(s_input1)) - to_integer(unsigned(s_input2))
-                )   when i_opCode="0101" else
+              std_logic_vector(
+                to_signed(
+                  to_integer( unsigned( s_input1 ))
+                 -
+                  to_integer( unsigned( s_input2 ))
+                  , 33))   when i_opCode="0101" else
               -- INC 
-              std_logic_vector(to_integer(unsigned(s_input1)) +1) when i_opCode="0110" else
+              std_logic_vector(
+                to_signed(
+                  to_integer( unsigned( i_operand1 )) + 1
+                  , 33)) when i_opCode="0110" else
               --SHR 
               '0' & std_logic_vector(
                 shift_right(unsigned(i_operand1), to_integer(unsigned(i_shiftAmount)))

@@ -10,23 +10,23 @@ z2
 cModel Technology
 dE:/Eng/Uni/Arch/LabExam_AbdelrhmanMahmoud_1180057
 Ealu
-Z0 w1623420079
+Z0 w1623420403
 Z1 DPx4 ieee 11 numeric_std 0 22 aU^R8eGcicLcUFIaBQSL>3
 Z2 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
 Z3 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
-!i122 10
+!i122 11
 Z4 dE:/4th Semester CCE/Computer Architecture/Project/arch-vonneumann-processor
 Z5 8E:/4th Semester CCE/Computer Architecture/Project/arch-vonneumann-processor/components/alu/alu.vhd
 Z6 FE:/4th Semester CCE/Computer Architecture/Project/arch-vonneumann-processor/components/alu/alu.vhd
 l0
 L5 1
-Vd<9cM;oz<fjTVAPJ=^_^72
-!s100 _oP2^STDaFEe>Pb>_U6RH2
+VmVgN0B9A1bBPNQ9F2L9zm2
+!s100 jnQE=P6c?m]jTVoW;imNb2
 Z7 OV;C;2020.1;71
 32
-Z8 !s110 1623420097
+Z8 !s110 1623420427
 !i10b 1
-Z9 !s108 1623420097.000000
+Z9 !s108 1623420427.000000
 Z10 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|E:/4th Semester CCE/Computer Architecture/Project/arch-vonneumann-processor/components/alu/alu.vhd|
 Z11 !s107 E:/4th Semester CCE/Computer Architecture/Project/arch-vonneumann-processor/components/alu/alu.vhd|
 !i113 1
@@ -36,12 +36,12 @@ Aarch
 R1
 R2
 R3
-Z14 DEx4 work 3 alu 0 22 d<9cM;oz<fjTVAPJ=^_^72
-!i122 10
-l24
-Z15 L17 46
-VkVadaBgk>?eY?a?5eJhC=0
-!s100 RZc<2kTiG9WeNGCj4fGBA1
+DEx4 work 3 alu 0 22 mVgN0B9A1bBPNQ9F2L9zm2
+!i122 11
+l23
+L16 46
+VEMadNbYVRIj>KHKh@neOT2
+!s100 eT^9c;S0c_jf]OfUQQenA3
 R7
 32
 R8

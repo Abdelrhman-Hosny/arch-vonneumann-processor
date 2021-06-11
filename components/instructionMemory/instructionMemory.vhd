@@ -8,7 +8,8 @@ PORT (  -- i removed clk since async read
 		-- assuming 2^20 locations therefore 20 bits address
 		-- will change later
 		i_address : IN std_logic_vector(19 DOWNTO 0);
-		o_dataout : OUT std_logic_vector(15 DOWNTO 0) 
+		o_dataout : OUT std_logic_vector(15 DOWNTO 0);
+		o_immediate : OUT std_logic_vector(15 DOWNTO 0)
 	  );
 END ENTITY ram;
 
@@ -21,4 +22,5 @@ ARCHITECTURE sync_ram_a OF ram IS
 	SIGNAL ram : ram_type ;
 BEGIN
 	o_dataout <= ram(to_integer(unsigned((i_address))));
+	o_immediate <= ram(to_integer(unsigned((i_address)))+1);
 END sync_ram_a;

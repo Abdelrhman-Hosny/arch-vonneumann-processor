@@ -1,3 +1,8 @@
+library ieee;
+use ieee.std_logic_1164.all;
+USE IEEE.numeric_std.all;
+
+
 entity adder1 is
   Generic (n: integer := 16); 
   port (
@@ -12,6 +17,6 @@ begin
 	Q <= std_logic_vector(
         to_signed(
           to_integer( unsigned(D)) + 1
-          , n))
+          , n));
     
 end architecture ; -- arch

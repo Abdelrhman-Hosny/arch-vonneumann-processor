@@ -60,7 +60,7 @@ end Component ;
 -- Adder signals
     -- PC will be I/P to Adders
     -- val will be 1 or 2 (will be adjusted before portmapping)
-    -- PC+1 will be O/P from Adders
+    -- PC+1 will be O/P from Adders (pc+1 here mean next instruction not just +1)
     Signal val         : integer := 1; 
     Signal PC_plus_one : std_logic_vector(15 DOWNTO 0) := (others =>'0');
 
@@ -122,7 +122,8 @@ end Component ;
 Signal Rdst  : std_logic_vector(2 DOWNTO 0) := Instruction(10 downto 8);
 
 -- Rscr1,Rscr2 
--- VERY IMPORTANT NOTE : When there's only 1 SRC USE Rscr2 
+-- VERY IMPORTANT NOTE : When there's only 1 SRC USE Rscr2
+-- Rdst = Rsrc2 (replace it later if you need ,, i made it just for illustration for now) 
 Signal Rsrc1 : std_logic_vector(2 DOWNTO 0) := Instruction(10 downto 8);
 Signal Rsrc2 : std_logic_vector(2 DOWNTO 0) := Instruction(7 downto 5);
 

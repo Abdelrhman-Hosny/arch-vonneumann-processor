@@ -133,6 +133,7 @@ Signal readData2 : std_logic_vector(31 DOWNTO 0);
 
 -- Write_address will come from (WB)
 -- Write_register will come from (WB) as well 
+
 -------------------------------------------------------------------
 
 -- STAGE 3 COMPONENTS & SIGNALS
@@ -163,19 +164,12 @@ end Component ;
 
 begin
 
---Assigning values
-Rdst  <= Instruction(10 downto 8);
-Rsrc1 <= Instruction(10 downto 8);
-Rsrc2 <= Instruction(7 downto 5);
 
+-- STAGE 1
+instructionMemory : ram port map (PC,Instruction,Immediate);
 
 
 -------------------------------------------------------------------
--- PORT MAPPING
-
---STAGE 1 
-instructionMemory : ram port map (PC,Instruction,Immediate);
-
 
 --STAGE 2
 
@@ -193,7 +187,31 @@ end process ; -- valueDecider
 
 adderPC : adder generic map(16) port map(PC,val,PC_plus_one);
 
-muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJump, uncondJump, pcSelector ,PC) ;
+muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJump, uncondJump, pcSelector ,PC);
+
+--Assigning values of signals Rdst,Rsrc1,Rsrc2
+Rdst  <= Instruction(10 downto 8);
+Rsrc1 <= Instruction(10 downto 8);
+Rsrc2 <= Instruction(7 downto 5);
+
+
+-------------------------------------------------------------------
+
+-- STAGE 3 
+
+
+
+-------------------------------------------------------------------
+
+-- STAGE 4 
+
+
+
+-------------------------------------------------------------------
+
+-- STAGE 5 
+
+
 
 -------------------------------------------------------------------
 

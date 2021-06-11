@@ -5,18 +5,19 @@ USE IEEE.numeric_std.all;
 --Register File
 --There are eight 4-byte general purpose registers
 -- since 8 -> address 3 bits 
--- NO CLK SINCE ITS ASYNC 
 entity registerfile is
   port (
     CLK               : IN std_logic;
     RST               : IN std_logic;
     write_enable      : IN std_logic;
+
     -- read addresses
     read_register1_address : IN std_logic_vector(2 DOWNTO 0);
     read_register2_address : IN std_logic_vector(2 DOWNTO 0);
+
     -- Outputs from register file (data read)
     register1_data    : OUT std_logic_vector(31 DOWNTO 0);
-    register2_data    : OUT std_logic_vector(31 DOWNTO 0)
+    register2_data    : OUT std_logic_vector(31 DOWNTO 0);
     
     --  write in register ( address / data )
     write_address     : IN std_logic_vector(2 DOWNTO 0);
@@ -36,15 +37,6 @@ Component My_nDFF_RegFile IS
 		);
 END Component;
 
--- my Tristate buffer Component
-Component My_N_TRISTATE IS
-	Generic (n: integer );
-	PORT(
-		data_in	: IN STD_LOGIC_VECTOR(n-1 downto 0);
-	    data_out: OUT STD_LOGIC_VECTOR(n-1 downto 0);
-		Enable  : IN STD_LOGIC
-	);
-END Component;
 
 -- 3x8 decoder 
 Component My_3x8Decoder IS
@@ -55,33 +47,30 @@ END Component;
 
 -- 8x1 multiplexer 
 Component mux8x1RegisterFile is port (
-                        i_1,i_2,i_3,i_4,i_5,i_6,i_7,i_8 : in std_logic_vector(31 downto 0);
+                        i_0,i_1,i_2,i_3,i_4,i_5,i_6,i_7 : in std_logic_vector(31 downto 0);
                         i_s:in std_logic_vector(2 downto 0);
-			o_selected :out std_logic_vector(31 downto 0)); 
+			o_selected :out std_logic_vector(31 downto 0)
+                        ); 
 end Component;
 
-
--- READ ADDRESSES SIGNALS USED IN DECODER
-signal read_address1_decoded : STD_LOGIC_VECTOR(7 downto 0);
-signal read_address2_decoded : STD_LOGIC_VECTOR(7 downto 0);
 
 
 -- contain write address of register 
 signal write_address_decoded : STD_LOGIC_VECTOR(7 downto 0);
 
 -- Output of the registers
-signal R0_OUT,R1_OUT,R2_OUT,R3_OUT,R4_OUT,R5_OUT,R6_OUT,R7_OUT ::std_logic_vector(31 downto 0);
+signal R0_OUT,R1_OUT,R2_OUT,R3_OUT,R4_OUT,R5_OUT,R6_OUT,R7_OUT :std_logic_vector(31 downto 0);
 
+-- Output of register file (readdata 1, readdata 2 )
+-- made them since vhdl doesnt allow reading outputs directly from entity
+signal read_output1 :std_logic_vector(31 downto 0);
+signal read_output2 :std_logic_vector(31 downto 0);
 
 begin
 
 
---READ!!
-decoder0: My_3x8Decoder port map (read_register1_address,read_address1_decoded);
-decoder1: My_3x8Decoder port map (read_register2_address,read_address2_decoded);
-
 --WRITE!!
-decoder2: My_3x8Decoder port map (write_address,write_address_decoded);
+decoder0: My_3x8Decoder port map (write_address,write_address_decoded);
 
 
 
@@ -98,8 +87,14 @@ R7:My_nDFF_RegFile generic map(32) port map(CLK,RST,write_address_decoded(7),wri
 
 
 -- output of register file (read data)
-mux0: mux8x1RegisterFile port map(R0_OUT,R1_OUT,R2_OUT,R3_OUT,R4_OUT,R5_OUT,R6_OUT,R7_OUT,register1_data)
-mux1: mux8x1RegisterFile port map(R0_OUT,R1_OUT,R2_OUT,R3_OUT,R4_OUT,R5_OUT,R6_OUT,R7_OUT,register2_data)
+mux0: mux8x1RegisterFile port map(
+  R0_OUT,R1_OUT,R2_OUT,R3_OUT,R4_OUT,R5_OUT,R6_OUT,R7_OUT,read_register1_address,read_output1);
 
+mux1: mux8x1RegisterFile port map(
+  R0_OUT,R1_OUT,R2_OUT,R3_OUT,R4_OUT,R5_OUT,R6_OUT,R7_OUT,read_register2_address,read_output2);
+
+-- assigning signals to realOutput 
+register1_data <= read_output1;
+register2_data <= read_output2;
 
 end architecture ; -- arch

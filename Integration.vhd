@@ -79,7 +79,7 @@ end Component ;
     Signal uncondJump : std_logic_vector(15 DOWNTO 0);
     
 -- PC REGISTER signals 
-    -- MUX OUTPUT : I/P from mux 4x1 signals 
+    -- MUX OUTPUT : I/P to My_nDFF_PC
     -- PC : O/P from My_nDFF_PC 
 Signal PC : std_logic_vector(15 DOWNTO 0) := (others =>'0');
 
@@ -123,7 +123,7 @@ Signal Rdst  : std_logic_vector(2 DOWNTO 0) := Instruction(10 downto 8);
 
 -- Rscr1,Rscr2 
 -- VERY IMPORTANT NOTE : When there's only 1 SRC USE Rscr2
--- Rdst = Rsrc2 (replace it later if you need ,, i made it just for illustration for now) 
+-- Rdst = Rsrc1 (replace it later if you need ,, i made it just for illustration for now) 
 Signal Rsrc1 : std_logic_vector(2 DOWNTO 0) := Instruction(10 downto 8);
 Signal Rsrc2 : std_logic_vector(2 DOWNTO 0) := Instruction(7 downto 5);
 

@@ -8,7 +8,6 @@ entity ALU is
     i_operand2    : IN STD_LOGIC_VECTOR (31 downto 0);
     o_output      : OUT STD_LOGIC_VECTOR (31 downto 0);
     i_opCode      : IN STD_LOGIC_VECTOR(3 downto 0);
-    i_Cin           : IN STD_LOGIC ; 
     o_Cout          : OUT STD_LOGIC;
     i_shiftAmount : IN STD_LOGIC_VECTOR (4 downto 0)
   );

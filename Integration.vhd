@@ -91,6 +91,7 @@ end Component ;
 -- PC REGISTER signals 
     -- MUX OUTPUT : I/P to My_nDFF_PC
     -- PC : O/P from My_nDFF_PC 
+Signal MuxPCOutput : std_logic_vector(15 DOWNTO 0) ; 
 Signal PC : std_logic_vector(15 DOWNTO 0) := (others =>'0');
 
 
@@ -236,16 +237,12 @@ begin
 end process ; -- valueDecider
 
 
-muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJumpAddress, uncondJumpAddress, pcSelector ,PC);
+muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJumpAddress, uncondJumpAddress, pcSelector ,MuxPCOutput);
+
+registerPC : My_nDFF_PC generic map(16) port map (CLK,'0','1',MuxPCOutput,PC); -- '0','1' FOR NOW ONLY
 
 adderPC : adder generic map(16) port map(PC,valPC,PC_plus_one);
 
-process(clk)
-begin 
-  if(rising_edge(clk)) THEN
-    PC <= PC_plus_one;
-  end if; 
-end process ; -- PCASSIGN
 
 -------------------------------------------------------------------
 

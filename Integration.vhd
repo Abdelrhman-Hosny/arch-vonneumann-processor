@@ -76,8 +76,8 @@ end Component ;
     
     -- input pc_plus_one
     Signal memory : std_logic_vector(15 DOWNTO 0);
-    Signal condJump : std_logic_vector(15 DOWNTO 0);
-    Signal uncondJump : std_logic_vector(15 DOWNTO 0);
+    Signal condJumpAddress : std_logic_vector(15 DOWNTO 0);
+    Signal uncondJumpAddress : std_logic_vector(15 DOWNTO 0);
     
 -- PC REGISTER signals 
     -- MUX OUTPUT : I/P to My_nDFF_PC
@@ -193,7 +193,7 @@ begin
 end process ; -- valueDecider
 
 
-muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJump, uncondJump, pcSelector ,PC);
+muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJumpAddress, uncondJumpAddress, pcSelector ,PC);
 
 adderPC : adder generic map(16) port map(PC,val,PC_plus_one);
 

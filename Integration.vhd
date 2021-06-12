@@ -65,6 +65,15 @@ end Component ;
     -- initial value of PC_plus_one = 1 ->
     Signal PC_plus_one : std_logic_vector(15 DOWNTO 0) := (0 => '1' ,others =>'0');
 
+-- mux 2x1
+  component mux2x1
+    Generic (n: integer :=16);
+    port (
+            i_0,i_1: in std_logic_vector(n-1 downto 0);
+            i_s:in std_logic;
+            o_selected :out std_logic_vector(n-1 downto 0)
+    ); 
+  end component;
 
 -- mux 4x1 -- PC SELECTOR  (signals) 
     -- 4 I/PS : PC+1 // MEMORY // COND JUMP // UNCOND JUMP 
@@ -90,6 +99,7 @@ Signal Instruction : std_logic_vector(15 DOWNTO 0); -- o_dataout
 
 -- we will need to extract data from PC+1 also (immediate)
 Signal Immediate : std_logic_vector(15 DOWNTO 0); -- o_immediate
+signal extendedImmediate : std_logic_vector(31 downto 0 );
 
 -------------------------------------------------------------------
 
@@ -239,8 +249,11 @@ controlUnitLabel : controlUnit port map(Instruction(15 downto 11),s_outputContro
                                             -- selector comes from forwarding unit not control unit
 aluMux1 : mux4x1  generic map(32) port map(readData1, x"00000000", x"00000000", x"00000000", "00", aluOperand1);
 aluMux2 : mux4x1  generic map(32) port map(readData2, x"00000000", x"00000000", x"00000000", "00", aluOperand2TempHolder);
-
-aluLabel : ALU port map (readData1,readData2,s_aluOutput , Instruction(4 downto 1) ,s_aluCout,Immediate(15 downto 11));
+                                                                          -- selector should be replaced
+                                                                          -- with immediate or reg decider from cu
+extendedImmediate <= x"0000" & immediate ; 
+aluMux3 : mux2x1  generic map(32) port map(aluOperand2TempHolder, extendedImmediate, '0', aluOperand2);
+aluLabel : ALU port map (aluOperand1, aluOperand2, s_aluOutput , Instruction(4 downto 1) , s_aluCout, Immediate(15 downto 11) );
 -- readData1, readData2 must be changed to be output from muxes 
 -- we just made it now for testing
 

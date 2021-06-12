@@ -18,7 +18,7 @@ entity execMemory IS
 		o_PC_plus_one       : OUT STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
         o_readData1         : OUT STD_LOGIC_VECTOR(31 downto 0);
         o_controlSignals    : OUT STD_LOGIC_VECTOR(7 downto 0);
-        o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0) ;
+        o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0)
 		);
 END execMemory;
 

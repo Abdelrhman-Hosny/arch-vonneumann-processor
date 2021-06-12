@@ -201,8 +201,33 @@ begin
         s_ccrEnable <= '0';
         s_wbEnable <= '1';
         s_wbSelector <= "10";   
+        --
+        -- NOP
+    elsif i_instruction = "01011" then
+        s_SPEnable <= '0';
+        s_memRead <= '0';
+        s_memWrite <= '0';
+        s_addSubSP <= '0';
+        s_ccrEnable <= '0';
+        s_wbEnable <= '0';
+        s_wbSelector <= "10";
+        --
+        -- MOV
+    elsif i_instruction = "10100" then
+        s_SPEnable <= '0';
+        s_memRead <= '0';
+        s_memWrite <= '0';
+        s_addSubSP <= '0';
+        s_ccrEnable <= '0';
+        s_wbEnable <= '1';
+        s_wbSelector <= "01";
     end if ;
+    -- stuff that you have to write manually 
+    
+    -- s_SPEnable, s_addSubSP, s_memRead, s_memWrite
+    -- s_ccrEnable,  s_wbEnable, s_wbSelector
 
+    -- total : 8
 
 
     end process;

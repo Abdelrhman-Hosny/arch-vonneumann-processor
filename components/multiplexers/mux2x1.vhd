@@ -12,7 +12,6 @@ end entity mux2x1;
 
 architecture arch of mux2x1 is 
 begin 
-    with i_s select 
-    o_selected <=   i_0 when "0",
-                    i_1 when "1";
+    o_selected <=   i_0 when i_s = '0'
+                    else i_1;
 end architecture arch;

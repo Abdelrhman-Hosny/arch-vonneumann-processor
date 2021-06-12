@@ -293,7 +293,7 @@ aluLabel : ALU port map (aluOperand1, aluOperand2, s_aluOutput , Instruction(4 d
 -- decide whether to add 2 or -2 based on instruction
 valueDeciderForSP : process(CLK)
 begin 
-    IF ( s_outputControl(9) = '1' ) THEN -- Will be removed CU and be from buffer
+    IF ( s_outputControl(5) = '1' ) THEN                 -- Will be removed CU and be from buffer
 			  valSP <= 2;
 	  ELSE
         valSP <= -2;
@@ -306,24 +306,10 @@ adderSP : adder generic map(16) port map(SP,valSP,SP_plus_one);
 -- Updating SP
 process(clk)
 begin 
-  if(rising_edge(clk) and s_outputControl(10) = '1') THEN -- Will be removed CU and be from buffer
+  if(rising_edge(clk) and s_outputControl(4) = '1') THEN -- Will be removed CU and be from buffer
     SP <= SP_plus_one;
   end if; 
 end process ; -- SPAssign
--------------------
-
--- Memory region
-
--- we have 2 mux2x1 before Memory 
-  -- first one
-    -- operands : SP / ALU output
-    -- Output : its o/p will enter memory as Address I/P
-  -- second one 
-    -- operands : PC+1 / ReadData1
-    -- Output : its o/p will enter memory as Data I/P
-
---mux2x1MemoryAddress : mux2x1 generic map(31) port map(s_aluOutput,SP,)
-
 
 
 -------------------------------------------------------------------

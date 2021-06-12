@@ -217,8 +217,7 @@ Component ALU is
       i_operand2    : IN STD_LOGIC_VECTOR (31 downto 0);
       o_output      : OUT STD_LOGIC_VECTOR (31 downto 0);
       i_opCode      : IN STD_LOGIC_VECTOR(3 downto 0);
-      o_Cout          : OUT STD_LOGIC;
-      i_shiftAmount : IN STD_LOGIC_VECTOR (4 downto 0)
+      o_Cout          : OUT STD_LOGIC
     );
 end Component ;
 
@@ -326,8 +325,10 @@ buffer_decodeExec: decodeExecBuffer port map(
   bo_fd_instruction(4 downto 1),
   s_outputControl,
   bi_de_extendedImmediate,
+  -- outputs
   bo_de_readData1, bo_de_readData2,
   bo_de_readData1Address, bo_de_readData2Address,
+  bo_de_writeAddress1,
   bo_de_PCNext,
   bo_de_aluOPCode,
   bo_de_cuSignals,
@@ -346,7 +347,7 @@ aluMux2 : mux4x1  generic map(32) port map(bo_de_readData2, x"00000000", x"00000
                                                                           -- with immediate or reg decider from cu
 
 aluMux3 : mux2x1  generic map(32) port map(aluOperand2TempHolder, bo_de_immediate, '0', aluOperand2);
-aluLabel : ALU port map (aluOperand1, aluOperand2, s_aluOutput , bo_de_aluOPCode , s_aluCout, bo_de_immediate );
+aluLabel : ALU port map (aluOperand1, aluOperand2, s_aluOutput , bo_de_aluOPCode , s_aluCout );
 -- readData1, readData2 must be changed to be output from muxes 
 -- we just made it now for testing
 

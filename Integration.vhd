@@ -63,7 +63,7 @@ end Component ;
     -- PC+1 will be O/P from Adders (pc+1 here mean next instruction not just +1)
     Signal valPC         : integer := 1; 
     -- initial value of PC_plus_one = 1 ->
-    Signal PC_plus_one : std_logic_vector(15 DOWNTO 0) := (0 => '1' ,others =>'0');
+    Signal PC_plus_one : std_logic_vector(15 DOWNTO 0) := (others =>'0');
 
 -- mux 2x1
   component mux2x1
@@ -91,7 +91,7 @@ end Component ;
 -- PC REGISTER signals 
     -- MUX OUTPUT : I/P to My_nDFF_PC
     -- PC : O/P from My_nDFF_PC 
-Signal MuxPCOutput : std_logic_vector(15 DOWNTO 0) ; 
+Signal MuxPCOutput : std_logic_vector(15 DOWNTO 0) := (others =>'0');
 Signal PC : std_logic_vector(15 DOWNTO 0) := (others =>'0');
 
 
@@ -224,25 +224,24 @@ begin
 
 
 -- STAGE 1
-instructionMemory : ram port map (PC,Instruction,Immediate);
 
 -- decide whether to add 1 or 2 based on instruction
 valueDeciderPC : process(Instruction)
 begin 
-    IF (Instruction(15 downto 11) = "01000" or Instruction(15 downto 11)= "00111" or Instruction(15 downto 13)= "110") THEN
-			  valPC <= 2;
-	  ELSE
-        valPC <= 1;
-    END IF;
+IF (Instruction(15 downto 11) = "01000" or Instruction(15 downto 11)= "00111" or Instruction(15 downto 13)= "110") THEN
+valPC <= 2;
+ELSE
+valPC <= 1;
+END IF;
 end process ; -- valueDecider
 
+adderPC : adder generic map(16) port map(PC,valPC,PC_plus_one);
 
 muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJumpAddress, uncondJumpAddress, pcSelector ,MuxPCOutput);
 
 registerPC : My_nDFF_PC generic map(16) port map (CLK,'0','1',MuxPCOutput,PC); -- '0','1' FOR NOW ONLY
 
-adderPC : adder generic map(16) port map(PC,valPC,PC_plus_one);
-
+instructionMemory : ram port map (PC,Instruction,Immediate);
 
 -------------------------------------------------------------------
 

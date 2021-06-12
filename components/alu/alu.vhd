@@ -8,8 +8,7 @@ entity ALU is
     i_operand2    : IN STD_LOGIC_VECTOR (31 downto 0);
     o_output      : OUT STD_LOGIC_VECTOR (31 downto 0);
     i_opCode      : IN STD_LOGIC_VECTOR(3 downto 0);
-    o_Cout          : OUT STD_LOGIC;
-    i_shiftAmount : IN STD_LOGIC_VECTOR (4 downto 0)
+    o_Cout          : OUT STD_LOGIC
   );
 end ALU ;
 
@@ -52,11 +51,11 @@ begin
                   , 33)) when i_opCode="0110" else
               --SHR 
               '0' & std_logic_vector(
-                shift_right(unsigned(i_operand1), to_integer(unsigned(i_shiftAmount)))
+                shift_right(unsigned(i_operand1), to_integer(unsigned(i_operand2(4 downto 0))))
                 ) when i_opCode="0111" else
               --SHL
               '0' & std_logic_vector(
-                shift_left(unsigned(i_operand1), to_integer(unsigned(i_shiftAmount)))
+                shift_left(unsigned(i_operand1), to_integer(unsigned(i_operand2(4 downto 0))))
                 ) when i_opCode="1000" ; 
 
  

@@ -210,6 +210,11 @@ Signal SP : std_logic_vector(15 DOWNTO 0) := (others =>'0');
 
 -- STAGE 5 COMPONENTS & SIGNALS
 
+-- we have 1 *  mux4x1 
+    -- operands : ReadData / IP port / ALU
+    -- Output wbData : its o/p Will be written back in register file
+
+Signal wbData : std_logic_vector(31 downto 0);
 
 -------------------------------------------------------------------
 
@@ -316,7 +321,10 @@ end process ; -- SPAssign
 
 -- STAGE 5 
 
-
+--WBmux
+-- muxWB : mux4x1 generic map (32) port map (
+--  ReadData_FROM_MEMORY,ipPort,alu,"0s",s_outputControl(1), wbData
+-- )
 
 -------------------------------------------------------------------
 

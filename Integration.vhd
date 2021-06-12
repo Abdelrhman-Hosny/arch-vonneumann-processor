@@ -62,7 +62,8 @@ end Component ;
     -- val will be 1 or 2 (will be adjusted before portmapping)
     -- PC+1 will be O/P from Adders (pc+1 here mean next instruction not just +1)
     Signal val         : integer := 1; 
-    Signal PC_plus_one : std_logic_vector(15 DOWNTO 0) := (others =>'0');
+    -- initial value of PC_plus_one = 1 ->
+    Signal PC_plus_one : std_logic_vector(15 DOWNTO 0) := (0 => '1' ,others =>'0');
 
 
 -- mux 4x1 -- PC SELECTOR  (signals) 
@@ -94,6 +95,15 @@ Signal Immediate : std_logic_vector(15 DOWNTO 0); -- o_immediate
 
 -- STAGE 2 COMPONENTS & SIGNALS
 
+-- Control Unit 
+Component controlUnit is
+  port (
+    i_instruction : IN std_logic_vector(4 downto 0);
+    o_outputControl : OUT std_logic_vector(16 downto 0)
+  ) ;
+end Component ;
+
+
 -- REGISTER FILE 
 Component registerfile is
     port (
@@ -118,14 +128,9 @@ end Component ;
 
 -- Write enable will come from (control signal)
 
--- Rdst = write_address (wb in regfile)
-Signal Rdst  : std_logic_vector(2 DOWNTO 0) := Instruction(10 downto 8);
 
--- Rscr1,Rscr2 
 -- VERY IMPORTANT NOTE : When there's only 1 SRC USE Rscr2
 -- Rdst = Rsrc1 (replace it later if you need ,, i made it just for illustration for now) 
-Signal Rsrc1 : std_logic_vector(2 DOWNTO 0) := Instruction(10 downto 8);
-Signal Rsrc2 : std_logic_vector(2 DOWNTO 0) := Instruction(7 downto 5);
 
 -- Outputs from register file (data read)
 Signal readData1 : std_logic_vector(31 DOWNTO 0);
@@ -133,6 +138,10 @@ Signal readData2 : std_logic_vector(31 DOWNTO 0);
 
 -- Write_address will come from (WB)
 -- Write_register will come from (WB) as well 
+
+-- CU Signals ::
+-- I/P :  Instruction(15 downto 11);
+Signal s_outputControl : std_logic_vector(16 downto 0) ; 
 
 -------------------------------------------------------------------
 
@@ -149,6 +158,11 @@ Component ALU is
       i_shiftAmount : IN STD_LOGIC_VECTOR (4 downto 0)
     );
 end Component ;
+
+-- Signals 
+Signal s_aluOutput : STD_LOGIC_VECTOR (31 downto 0);
+Signal s_aluCout   : STD_LOGIC;
+
 -------------------------------------------------------------------
 
 -- STAGE 4 COMPONENTS & SIGNALS
@@ -168,37 +182,53 @@ begin
 -- STAGE 1
 instructionMemory : ram port map (PC,Instruction,Immediate);
 
+-- decide whether to add 1 or 2 based on instruction
+valueDecider : process(Instruction)
+begin 
+    IF (Instruction(15 downto 11) = "01000" or Instruction(15 downto 11)= "00111" or Instruction(15 downto 13)= "110") THEN
+			  val <= 2;
+	  ELSE
+        val <= 1;
+    END IF;
+end process ; -- valueDecider
+
+
+muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJump, uncondJump, pcSelector ,PC);
+
+adderPC : adder generic map(16) port map(PC,val,PC_plus_one);
+
+process(clk)
+begin 
+  if(rising_edge(clk)) THEN
+    PC <= PC_plus_one;
+  end if; 
+end process ; -- PCASSIGN
 
 -------------------------------------------------------------------
 
 --STAGE 2
 
--- decide whether to add 1 or 2 based on instruction
-valueDecider : process(Instruction)
-begin 
-    IF (Instruction(15 downto 11) = "01000" or Instruction(15 downto 11)= "00111" or Instruction(15 downto 13)= "110") THEN
-			val <= 2;
-	ELSE
-            val <= 1;
-    END IF;
-end process ; -- valueDecider
 
--- regFile : registerfile port map(CLK,write_enable.Rscr1,Rscr2,readData1,readData2)
+registerFileLabel : registerfile port map(
+  CLK,s_outputControl(0),Instruction(10 downto 8),Instruction(7 downto 5),readData1,readData2,"000",x"00000000"
+  );
 
-adderPC : adder generic map(16) port map(PC,val,PC_plus_one);
 
-muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJump, uncondJump, pcSelector ,PC);
 
---Assigning values of signals Rdst,Rsrc1,Rsrc2
-Rdst  <= Instruction(10 downto 8);
-Rsrc1 <= Instruction(10 downto 8);
-Rsrc2 <= Instruction(7 downto 5);
+-- Rdst  <= Instruction(10 downto 8);
+-- Rsrc1 <= Instruction(10 downto 8);
+-- Rsrc2 <= Instruction(7 downto 5);
+
+controlUnitLabel : controlUnit port map(Instruction(15 downto 11),s_outputControl);
 
 
 -------------------------------------------------------------------
 
 -- STAGE 3 
 
+aluLabel : ALU port map (readData1,readData2,s_aluOutput , Instruction(4 downto 1) ,s_aluCout,Immediate(15 downto 11));
+-- readData1, readData2 must be changed to be output from muxes 
+-- we just made it now for testing
 
 
 -------------------------------------------------------------------

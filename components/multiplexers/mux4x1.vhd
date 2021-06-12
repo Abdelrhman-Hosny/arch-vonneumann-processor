@@ -12,9 +12,8 @@ end entity mux4x1;
 
 architecture arch of mux4x1 is 
 begin 
-with i_s select 
-o_selected <=   i_0 when "00",
-                i_1 when "01",
-                i_2 when "10",
-                i_3 when "11";                
+o_selected <=   i_0 when i_s = "00" else
+                i_1 when i_s = "01" else
+                i_2 when i_s ="10"  else 
+                i_3;                 
  end architecture arch;

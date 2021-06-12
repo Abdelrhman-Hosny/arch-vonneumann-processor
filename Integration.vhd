@@ -167,6 +167,40 @@ Signal s_aluCout   : STD_LOGIC;
 
 -- STAGE 4 COMPONENTS & SIGNALS
 
+-- Adder by 2 , - 2 of the SP
+-- signals
+    -- SP will be I/P to Adder
+    -- val will be -2 or 2 (will be adjusted before portmapping)
+    -- PC+1 will be O/P from Adders (pc+1 here mean next instruction not just +1)
+    Signal val         : integer := 1; 
+    -- initial value of PC_plus_one = 1 ->
+    Signal PC_plus_one : std_logic_vector(15 DOWNTO 0) := (0 => '1' ,others =>'0');
+
+
+-- SP Register will be same (My_nDFF_PC)
+-- SP REGISTER signals 
+    -- operands : O/P from adderSP 
+    -- SP : O/P from My_nDFF_PC 
+Signal SP : std_logic_vector(15 DOWNTO 0) := (others =>'0');
+
+-- 2x1 muxes before Memory 
+Component mux2x1 is 
+	Generic (n: integer :=16);
+    port (
+            i_0,i_1: in std_logic_vector(n-1 downto 0);
+            i_s:in std_logic;
+            o_selected :out std_logic_vector(n-1 downto 0)
+        ); 
+end Component;
+
+-- we have 2 mux2x1 
+  -- first one
+    -- operands : SP / ALU output
+    -- Output : its o/p will enter memory as Address I/P
+  -- second one 
+    -- operands : PC+1 / ReadData1
+    -- Output : its o/p will enter memory as Data I/P
+
 
 -------------------------------------------------------------------
 

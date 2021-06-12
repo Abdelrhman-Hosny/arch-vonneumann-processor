@@ -279,7 +279,7 @@ aluMux1 : mux4x1  generic map(32) port map(readData1, x"00000000", x"00000000", 
 aluMux2 : mux4x1  generic map(32) port map(readData2, x"00000000", x"00000000", x"00000000", "00", aluOperand2TempHolder);
                                                                           -- selector should be replaced
                                                                           -- with immediate or reg decider from cu
-extendedImmediate <= x"0000" & immediate ; 
+extendedImmediate <= std_logic_vector(resize( signed(immediate), 32) ) ; 
 aluMux3 : mux2x1  generic map(32) port map(aluOperand2TempHolder, extendedImmediate, '0', aluOperand2);
 aluLabel : ALU port map (aluOperand1, aluOperand2, s_aluOutput , Instruction(4 downto 1) , s_aluCout, Immediate(15 downto 11) );
 -- readData1, readData2 must be changed to be output from muxes 

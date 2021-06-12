@@ -56,13 +56,44 @@ port(
 );
 
 end component;
-
+-- ID EX Signals
 signal bo_de_readData1, bo_de_readData2 : std_logic_vector( 31 downto 0);
 signal bo_de_writeAddress1, bo_de_readData1Address , bo_de_readData2Address : std_logic_vector( 2 downto 0 );
 signal bo_de_PCNext : std_logic_vector( 15 downto 0 );
 signal bo_de_cuSignals : std_logic_vector (16 downto 0);
 signal bo_de_aluOPCode : std_logic_vector (3 downto 0);
 signal bo_de_immediate : std_logic_vector( 31 downto 0);
+------------------------------------
+-- EX MEM Buffer
+component execMemory
+port(
+  clk                 : IN STD_LOGIC ; 
+		-- inputs to buffer
+        i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
+		    i_PC_plus_one       : IN STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
+        i_readData1         : IN STD_LOGIC_VECTOR(31 downto 0);
+        i_controlSignals    : IN STD_LOGIC_VECTOR(7 downto 0);
+        i_writeAddress      : IN STD_LOGIC_VECTOR(2 downto 0) ;
+        
+        -- outputs 
+        o_aluData           : OUT STD_LOGIC_VECTOR(31 downto 0) ;
+		    o_PC_plus_one       : OUT STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
+        o_readData1         : OUT STD_LOGIC_VECTOR(31 downto 0);
+        o_controlSignals    : OUT STD_LOGIC_VECTOR(7 downto 0);
+        o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0)
+
+);
+end component;
+
+-- EX MEM Signals
+
+
+signal bi_em_controlSignals, bo_em_controlSignals : std_logic_vector(7 downto 0);
+
+signal bo_em_aluOutput, bo_em_readData1 : std_logic_vector(31 downto 0);
+signal bo_em_PCNext : std_logic_vector(15 downto 0);
+signal bo_em_writeAddress1 : std_logic_vector(2 downto 0);
+
 -------------------------------------------------------------------
 -- STAGE 1 COMPONENTS & SIGNALS
 
@@ -348,10 +379,42 @@ aluMux2 : mux4x1  generic map(32) port map(bo_de_readData2, x"00000000", x"00000
 
 aluMux3 : mux2x1  generic map(32) port map(aluOperand2TempHolder, bo_de_immediate, '0', aluOperand2);
 aluLabel : ALU port map (aluOperand1, aluOperand2, s_aluOutput , bo_de_aluOPCode , s_aluCout );
+
+bi_em_controlSignals <=  bo_de_cuSignals(13) & bo_de_cuSignals(6 downto 0);
 -- readData1, readData2 must be changed to be output from muxes 
 -- we just made it now for testing
+buffer_execMemory: execMemory port map( clk,
+                                        -- inputs
+                                        s_aluOutput,
+                                        bo_de_PCNext,
+                                        bo_de_readData1,
+                                        bi_em_controlSignals,-- control signals
+                                        bo_de_writeAddress1,
+                                        -- outputs
+                                        bo_em_aluOutput,
+                                        bo_em_PCNext,
+                                        bo_em_readData1,
+                                        bo_em_controlSignals,
+                                        bo_em_writeAddress1
+                                        );
+-- component execMemory
+-- port(
+--   clk                 : IN STD_LOGIC ; 
+-- 		-- inputs to buffer
+--         i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
+-- 		    i_PC_plus_one       : IN STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
+--         i_readData1         : IN STD_LOGIC_VECTOR(31 downto 0);
+--         i_controlSignals    : IN STD_LOGIC_VECTOR(7 downto 0);
+--         i_writeAddress      : IN STD_LOGIC_VECTOR(2 downto 0) ;
+        
+--         -- outputs 
+--         o_aluData           : OUT STD_LOGIC_VECTOR(31 downto 0) ;
+-- 		    o_PC_plus_one       : OUT STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
+--         o_readData1         : OUT STD_LOGIC_VECTOR(31 downto 0);
+--         o_controlSignals    : OUT STD_LOGIC_VECTOR(7 downto 0);
+--         o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0)
 
-
+-- );
 -------------------------------------------------------------------
 
 -- STAGE 4

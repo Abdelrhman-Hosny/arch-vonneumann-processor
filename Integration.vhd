@@ -279,6 +279,18 @@ Signal s_aluOutput : STD_LOGIC_VECTOR (31 downto 0);
 Signal s_aluCout   : STD_LOGIC;
 signal aluOperand1, aluOperand2, aluOperand2TempHolder :  STD_LOGIC_VECTOR (31 downto 0);
 
+-- OUT PORT 
+Component My_nDFF_OUTPORT IS
+        Generic (n: integer :=16);
+        PORT(
+                  W_Enable: IN STD_LOGIC ;
+                        D : IN STD_LOGIC_VECTOR(n-1 downto 0) ;
+                        Q : OUT STD_LOGIC_VECTOR(n-1 downto 0)
+            );
+END Component;
+
+-- Signals 
+Signal OUTPORT_output : STD_LOGIC_VECTOR(31 downto 0);
 -------------------------------------------------------------------
 
 -- STAGE 4 COMPONENTS & SIGNALS
@@ -320,7 +332,7 @@ Signal SP : std_logic_vector(15 DOWNTO 0) := (others =>'0');
     -- Output wbData : its o/p Will be written back in register file
 
 -- I/P Port
-Component My_nDFF_Port IS
+Component My_nDFF_INPort IS
 	Generic (n: integer :=32);
 	PORT(
 	        RST : IN STD_LOGIC ;
@@ -435,6 +447,12 @@ buffer_execMemory: execMemory port map( clk,
                                         bo_em_controlSignals,
                                         bo_em_writeAddress1
                                         );
+
+
+-- OUTPORT 
+OUT_PORT : My_nDFF_OUTPORT generic map(32) port map (bo_de_cuSignals(12),bo_de_readData1,OUTPORT_output);
+
+
 -------------------------------------------------------------------
 
 -- STAGE 4
@@ -478,7 +496,7 @@ buffer_memWB : memoryWB port map( clk,
 -- STAGE 5 
 
 -- I/P PORT
-IP_PORT : My_nDFF_Port generic map(32) port map('0',IPPort_Input,IPPort_Output);
+IP_PORT : My_nDFF_INPORT generic map(32) port map('0',IPPort_Input,IPPort_Output);
 
 
 --WBmux

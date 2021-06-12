@@ -48,7 +48,7 @@ END Component;
 Component mux8x1RegisterFile is port (
                         i_0,i_1,i_2,i_3,i_4,i_5,i_6,i_7 : in std_logic_vector(31 downto 0);
                         i_s:in std_logic_vector(2 downto 0);
-			o_selected :out std_logic_vector(31 downto 0)
+			                  o_selected :out std_logic_vector(31 downto 0)
                         ); 
 end Component;
 
@@ -93,7 +93,12 @@ mux1: mux8x1RegisterFile port map(
   R0_OUT,R1_OUT,R2_OUT,R3_OUT,R4_OUT,R5_OUT,R6_OUT,R7_OUT,read_register2_address,read_output2);
 
 -- assigning signals to realOutput 
-register1_data <= read_output1;
-register2_data <= read_output2;
+register1_data <=   (others=>'X') when read_register1_address = "UUU" else
+                    read_output1;
+                   
+register2_data <=   (others=>'X') when read_register2_address = "UUU" else
+                    read_output2;
+-- register1_data <= read_output1;
+-- register2_data <= read_output2;
 
 end architecture ; -- arch

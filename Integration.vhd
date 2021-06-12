@@ -352,7 +352,7 @@ buffer_fetchDecode : fetchDecode port map(clk,
 
 registerFileLabel : registerfile port map(
   CLK,s_outputControl(0),bo_fd_instruction(10 downto 8),bo_fd_instruction(7 downto 5),readData1,readData2,"000",x"00000000"
-  );
+);
 
 
   bi_de_extendedImmediate <= std_logic_vector(resize( signed(bo_fd_immediate), 32) ) ; 

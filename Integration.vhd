@@ -59,9 +59,9 @@ end Component ;
 
 -- Adder signals
     -- PC will be I/P to Adders
-    -- val will be 1 or 2 (will be adjusted before portmapping)
+    -- valPC will be 1 or 2 (will be adjusted before portmapping)
     -- PC+1 will be O/P from Adders (pc+1 here mean next instruction not just +1)
-    Signal val         : integer := 1; 
+    Signal valPC         : integer := 1; 
     -- initial value of PC_plus_one = 1 ->
     Signal PC_plus_one : std_logic_vector(15 DOWNTO 0) := (0 => '1' ,others =>'0');
 
@@ -178,6 +178,33 @@ signal aluOperand1, aluOperand2, aluOperand2TempHolder :  STD_LOGIC_VECTOR (31 d
 
 -- STAGE 4 COMPONENTS & SIGNALS
 
+-- 2 * 2x1 muxes before Memory 
+-- 1 * 2x1 mux before AdderSP to choose 2,-2
+
+
+-- Adder by 2 , - 2 of the SP
+-- signals
+    -- SP will be I/P to Adder
+    -- val will be -2 or 2 (will be adjusted before portmapping)
+    --SP_plus_one will be O/P from Adders will be next sp and will update sp
+    Signal valSP         : integer := 2; 
+    Signal SP_plus_one : std_logic_vector(15 DOWNTO 0);
+
+-- SP Register will be same (My_nDFF_PC)
+-- SP REGISTER signals 
+    -- operands : O/P from adderSP 
+    -- SP : O/P from My_nDFF_PC 
+Signal SP : std_logic_vector(15 DOWNTO 0) := (others =>'0');
+
+
+-- we have 2 mux2x1 before Memory 
+  -- first one
+    -- operands : SP / ALU output
+    -- Output : its o/p will enter memory as Address I/P
+  -- second one 
+    -- operands : PC+1 / ReadData1
+    -- Output : its o/p will enter memory as Data I/P
+
 
 -------------------------------------------------------------------
 
@@ -194,19 +221,19 @@ begin
 instructionMemory : ram port map (PC,Instruction,Immediate);
 
 -- decide whether to add 1 or 2 based on instruction
-valueDecider : process(Instruction)
+valueDeciderPC : process(Instruction)
 begin 
     IF (Instruction(15 downto 11) = "01000" or Instruction(15 downto 11)= "00111" or Instruction(15 downto 13)= "110") THEN
-			  val <= 2;
+			  valPC <= 2;
 	  ELSE
-        val <= 1;
+        valPC <= 1;
     END IF;
 end process ; -- valueDecider
 
 
 muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJumpAddress, uncondJumpAddress, pcSelector ,PC);
 
-adderPC : adder generic map(16) port map(PC,val,PC_plus_one);
+adderPC : adder generic map(16) port map(PC,valPC,PC_plus_one);
 
 process(clk)
 begin 
@@ -260,9 +287,50 @@ aluLabel : ALU port map (aluOperand1, aluOperand2, s_aluOutput , Instruction(4 d
 
 -------------------------------------------------------------------
 
--- STAGE 4 
+-- STAGE 4
 
+-- SP REGION 
+-- decide whether to add 2 or -2 based on instruction
+valueDeciderForSP : process(CLK)
+begin 
+    IF ( s_outputControl(9) = '1' ) THEN -- check index 9 !!
+			  valSP <= 2;
+	  ELSE
+        valSP <= -2;
+    END IF;
+end process ; -- valueDeciderForSP
 
+-- SP Adder
+adderSP : adder generic map(16) port map(SP,valSP,SP_plus_one);
+
+-- Updating SP
+process(clk)
+begin 
+  if(rising_edge(clk) and s_outputControl(10) = '1') THEN -- check index (10) = SPWriteEnable
+    SP <= SP_plus_one;
+  end if; 
+end process ; -- SPAssign
+-------------------
+
+-- Memory region
+
+-- we have 2 mux2x1 before Memory 
+  -- first one
+    -- operands : SP / ALU output
+    -- Output : its o/p will enter memory as Address I/P
+  -- second one 
+    -- operands : PC+1 / ReadData1
+    -- Output : its o/p will enter memory as Data I/P
+
+-- mux2x1MemoryAddress : mux2x1 generic map(31)
+-- entity mux2x1 is 
+-- 	Generic (n: integer :=16);
+--     port (
+--             i_0,i_1: in std_logic_vector(n-1 downto 0);
+--             i_s:in std_logic;
+--             o_selected :out std_logic_vector(n-1 downto 0)
+--         ); 
+-- end entity mux2x1;
 
 -------------------------------------------------------------------
 

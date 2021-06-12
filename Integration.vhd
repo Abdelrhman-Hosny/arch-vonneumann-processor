@@ -267,6 +267,22 @@ Signal SP : std_logic_vector(15 DOWNTO 0) := (others =>'0');
     -- operands : ReadData / IP port / ALU
     -- Output wbData : its o/p Will be written back in register file
 
+-- I/P Port
+Component My_nDFF_Port IS
+	Generic (n: integer :=32);
+	PORT(
+	  RST,W_Enable: IN STD_LOGIC ;
+					D : IN STD_LOGIC_VECTOR(n-1 downto 0) ;
+					Q : OUT STD_LOGIC_VECTOR(n-1 downto 0):=(others=>'0')
+		);
+END Component;
+
+-- I/P PORT Signals
+  --RST -> '0' , WriteEnable -> from ( buffer control signal) 
+  Signal IPPort_Input : STD_LOGIC_VECTOR(31 downto 0);
+  Signal IPPort_Output : STD_LOGIC_VECTOR(31 downto 0);
+
+--o/p from 4x1 multiplexer
 Signal wbData : std_logic_vector(31 downto 0);
 
 -------------------------------------------------------------------
@@ -382,9 +398,13 @@ end process ; -- SPAssign
 
 -- STAGE 5 
 
+-- I/P PORT
+IP_PORT : My_nDFF_Port generic map(32) port map('0','1',IPPort_Input,IPPort_Output);
+
+
 --WBmux
 -- muxWB : mux4x1 generic map (32) port map (
---  ReadData_FROM_MEMORY,ipPort,alu,"0s",s_outputControl(1), wbData
+--  ReadData_FROM_MEMORY_frombuffer,IPPort_Output,alu_frombuffer,(others=>'0'),wb_selector_from_buffer, wbData
 -- )
 
 -------------------------------------------------------------------

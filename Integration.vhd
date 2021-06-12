@@ -162,6 +162,7 @@ end Component ;
 -- Signals 
 Signal s_aluOutput : STD_LOGIC_VECTOR (31 downto 0);
 Signal s_aluCout   : STD_LOGIC;
+signal aluOperand1, aluOperand2, aluOperand2TempHolder :  STD_LOGIC_VECTOR (31 downto 0);
 
 -------------------------------------------------------------------
 
@@ -225,6 +226,19 @@ controlUnitLabel : controlUnit port map(Instruction(15 downto 11),s_outputContro
 -------------------------------------------------------------------
 
 -- STAGE 3 
+-- Component mux4x1 is 
+-- 	Generic (n: integer :=16);
+--     port (
+--             i_0,i_1,i_2,i_3: in std_logic_vector(n-1 downto 0);
+--             i_s:in std_logic_vector(1 downto 0);
+--             o_selected :out std_logic_vector(n-1 downto 0)
+--         ); 
+-- end Component;
+                                            -- op 2 and 3 are forwarded data from mem and previous alu
+                                            -- op4 is never accessed
+                                            -- selector comes from forwarding unit not control unit
+aluMux1 : mux4x1  generic map(32) port map(readData1, x"00000000", x"00000000", x"00000000", "00", aluOperand1);
+aluMux2 : mux4x1  generic map(32) port map(readData2, x"00000000", x"00000000", x"00000000", "00", aluOperand2TempHolder);
 
 aluLabel : ALU port map (readData1,readData2,s_aluOutput , Instruction(4 downto 1) ,s_aluCout,Immediate(15 downto 11));
 -- readData1, readData2 must be changed to be output from muxes 

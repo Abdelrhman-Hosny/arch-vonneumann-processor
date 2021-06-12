@@ -93,6 +93,28 @@ signal bi_em_controlSignals, bo_em_controlSignals : std_logic_vector(7 downto 0)
 signal bo_em_aluOutput, bo_em_readData1 : std_logic_vector(31 downto 0);
 signal bo_em_PCNext : std_logic_vector(15 downto 0);
 signal bo_em_writeAddress1 : std_logic_vector(2 downto 0);
+---------------------------
+-- MEM WB Buffer
+component memoryWB
+port(
+      clk                 : IN STD_LOGIC ; 
+  -- inputs to buffer
+      i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
+      i_memoryData        : IN STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
+      i_controlSignals    : IN STD_LOGIC_VECTOR(2 downto 0);
+      i_writeAddress      : IN STD_LOGIC_VECTOR(2 downto 0) ;
+      
+      -- outputs 
+      o_aluData           : OUT STD_LOGIC_VECTOR(31 downto 0) ;
+      o_memoryData        : OUT STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
+      o_controlSignals    : OUT STD_LOGIC_VECTOR(2 downto 0);
+      o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0) 
+);
+end component;
+
+-- MEM WB Buffer
+signal bo_mw_aluData, bo_mw_memoryData : STD_LOGIC_VECTOR(31 downto 0);
+signal bo_mw_controlSignals, bo_mw_writeAddress : STD_LOGIC_VECTOR(2 downto 0);
 
 -------------------------------------------------------------------
 -- STAGE 1 COMPONENTS & SIGNALS
@@ -351,7 +373,7 @@ buffer_fetchDecode : fetchDecode port map(clk,
 
 
 registerFileLabel : registerfile port map(
-  CLK,s_outputControl(0),bo_fd_instruction(10 downto 8),bo_fd_instruction(7 downto 5),readData1,readData2,"000",x"00000000"
+  CLK,bo_mw_controlSignals(0),bo_fd_instruction(10 downto 8),bo_fd_instruction(7 downto 5),readData1,readData2,bo_mw_writeAddress,wbData
 );
 
 
@@ -413,24 +435,6 @@ buffer_execMemory: execMemory port map( clk,
                                         bo_em_controlSignals,
                                         bo_em_writeAddress1
                                         );
--- component execMemory
--- port(
---   clk                 : IN STD_LOGIC ; 
--- 		-- inputs to buffer
---         i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
--- 		    i_PC_plus_one       : IN STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
---         i_readData1         : IN STD_LOGIC_VECTOR(31 downto 0);
---         i_controlSignals    : IN STD_LOGIC_VECTOR(7 downto 0);
---         i_writeAddress      : IN STD_LOGIC_VECTOR(2 downto 0) ;
-        
---         -- outputs 
---         o_aluData           : OUT STD_LOGIC_VECTOR(31 downto 0) ;
--- 		    o_PC_plus_one       : OUT STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
---         o_readData1         : OUT STD_LOGIC_VECTOR(31 downto 0);
---         o_controlSignals    : OUT STD_LOGIC_VECTOR(7 downto 0);
---         o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0)
-
--- );
 -------------------------------------------------------------------
 
 -- STAGE 4
@@ -439,7 +443,7 @@ buffer_execMemory: execMemory port map( clk,
 -- decide whether to add 2 or -2 based on instruction
 valueDeciderForSP : process(CLK)
 begin 
-    IF ( s_outputControl(5) = '1' ) THEN                 -- Will be removed CU and be from buffer
+    IF ( bo_em_controlSignals(5) = '1' ) THEN                 -- Will be removed CU and be from buffer
 			  valSP <= 2;
 	  ELSE
         valSP <= -2;
@@ -452,12 +456,23 @@ adderSP : adder generic map(16) port map(SP,valSP,SP_plus_one);
 -- Updating SP
 process(clk)
 begin 
-  if(rising_edge(clk) and s_outputControl(4) = '1') THEN -- Will be removed CU and be from buffer
+  if(rising_edge(clk) and bo_em_controlSignals(4) = '1') THEN -- Will be removed CU and be from buffer
     SP <= SP_plus_one;
   end if; 
 end process ; -- SPAssign
 
-
+buffer_memWB : memoryWB port map( clk,
+                                  -- inputs
+                                  bo_em_aluOutput,
+                                  x"00000000", -- memoryData
+                                  bo_em_controlSignals(2 downto 0),
+                                  bo_em_writeAddress1,
+                                  -- outputs
+                                  bo_mw_aluData,
+                                  bo_mw_memoryData,
+                                  bo_mw_controlSignals,
+                                  bo_mw_writeAddress
+                                  );
 -------------------------------------------------------------------
 
 -- STAGE 5 
@@ -467,9 +482,9 @@ IP_PORT : My_nDFF_Port generic map(32) port map('0',IPPort_Input,IPPort_Output);
 
 
 --WBmux
--- muxWB : mux4x1 generic map (32) port map (
---  ReadData_FROM_MEMORY_frombuffer,IPPort_Output,alu_frombuffer,(others=>'0'),wb_selector_from_buffer, wbData
--- )
+muxWB : mux4x1 generic map (32) port map (
+  bo_mw_memoryData, bo_mw_aluData, IPPort_Output,(others=>'0'),bo_mw_controlSignals(2 downto 1), wbData
+);
 
 -------------------------------------------------------------------
 

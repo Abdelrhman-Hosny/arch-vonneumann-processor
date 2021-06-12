@@ -8,7 +8,7 @@ entity My_nDFF_PC IS
 	PORT(
 	  CLK,RST,W_Enable: IN STD_LOGIC ;
 					D : IN STD_LOGIC_VECTOR(n-1 downto 0) ;
-					Q : OUT STD_LOGIC_VECTOR(n-1 downto 0)
+					Q : OUT STD_LOGIC_VECTOR(n-1 downto 0):=(others=>'0')
 		);
 END My_nDFF_PC;
 

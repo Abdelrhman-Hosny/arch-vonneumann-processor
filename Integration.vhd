@@ -301,14 +301,14 @@ Signal SP : std_logic_vector(15 DOWNTO 0) := (others =>'0');
 Component My_nDFF_Port IS
 	Generic (n: integer :=32);
 	PORT(
-	  RST,W_Enable: IN STD_LOGIC ;
-					D : IN STD_LOGIC_VECTOR(n-1 downto 0) ;
-					Q : OUT STD_LOGIC_VECTOR(n-1 downto 0):=(others=>'0')
+	        RST : IN STD_LOGIC ;
+					D   : IN STD_LOGIC_VECTOR(n-1 downto 0) ;
+					Q   : OUT STD_LOGIC_VECTOR(n-1 downto 0):=(others=>'0')
 		);
 END Component;
 
 -- I/P PORT Signals
-  --RST -> '0' , WriteEnable -> from ( buffer control signal) 
+  --RST -> '0' 
   Signal IPPort_Input : STD_LOGIC_VECTOR(31 downto 0);
   Signal IPPort_Output : STD_LOGIC_VECTOR(31 downto 0);
 
@@ -463,7 +463,7 @@ end process ; -- SPAssign
 -- STAGE 5 
 
 -- I/P PORT
-IP_PORT : My_nDFF_Port generic map(32) port map('0','1',IPPort_Input,IPPort_Output);
+IP_PORT : My_nDFF_Port generic map(32) port map('0',IPPort_Input,IPPort_Output);
 
 
 --WBmux

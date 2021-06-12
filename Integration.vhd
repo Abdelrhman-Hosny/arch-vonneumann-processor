@@ -233,7 +233,7 @@ valPC <= 2;
 ELSE
 valPC <= 1;
 END IF;
-end process ; -- valueDecider
+end process ; -- valueDeciderPC
 
 adderPC : adder generic map(16) port map(PC,valPC,PC_plus_one);
 

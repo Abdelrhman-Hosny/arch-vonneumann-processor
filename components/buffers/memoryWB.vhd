@@ -13,10 +13,10 @@ entity memoryWB IS
         i_writeAddress      : IN STD_LOGIC_VECTOR(2 downto 0) ;
         
         -- outputs 
-        o_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
-		o_memoryData        : IN STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
-        o_controlSignals    : IN STD_LOGIC_VECTOR(2 downto 0);
-        o_writeAddress      : IN STD_LOGIC_VECTOR(2 downto 0) ;
+        o_aluData           : OUT STD_LOGIC_VECTOR(31 downto 0) ;
+		o_memoryData        : OUT STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
+        o_controlSignals    : OUT STD_LOGIC_VECTOR(2 downto 0);
+        o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0) 
         
 		);
 END memoryWB;

@@ -10,7 +10,28 @@ entity processor is
 end processor ;
 
 architecture arch of processor is
+-------------------------------------------------------------------
+-- Buffers
+-- IF/ID
+component fetchDecode
+port(
+        clk           : IN STD_LOGIC ; 
+		-- inputs to buffer
+        i_Instruction : IN STD_LOGIC_VECTOR(15 downto 0) ;
+		    i_immediate   : IN STD_LOGIC_VECTOR(15 downto 0);
+        i_PC_plus_one : IN STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
+        i_enable      : IN STD_LOGIC ;
+        i_F_Flush     : IN STD_LOGIC ;
+        
+        -- outputs 
+        o_Instruction : OUT STD_LOGIC_VECTOR(15 downto 0) ;
+	    	o_immediate   : OUT STD_LOGIC_VECTOR(15 downto 0);
+        o_PC_plus_one : OUT STD_LOGIC_VECTOR(15 downto 0 ) 
 
+);
+end component;
+
+signal bo_fd_instruction, bo_fd_immediate, bo_fd_PC_plus_one : STD_LOGIC_VECTOR(15 downto 0) ;
 -------------------------------------------------------------------
 -- STAGE 1 COMPONENTS & SIGNALS
 
@@ -243,13 +264,17 @@ registerPC : My_nDFF_PC generic map(16) port map (CLK,'0','1',MuxPCOutput,PC); -
 
 instructionMemory : ram port map (PC,Instruction,Immediate);
 
+buffer_fetchDecode : fetchDecode port map(clk, 
+                                          Instruction, Immediate,PC_plus_one,
+                                          '1', '0',
+                                          bo_fd_instruction,bo_fd_immediate,bo_fd_PC_plus_one );
 -------------------------------------------------------------------
 
 --STAGE 2
 
 
 registerFileLabel : registerfile port map(
-  CLK,s_outputControl(0),Instruction(10 downto 8),Instruction(7 downto 5),readData1,readData2,"000",x"00000000"
+  CLK,s_outputControl(0),bo_fd_instruction(10 downto 8),bo_fd_instruction(7 downto 5),readData1,readData2,"000",x"00000000"
   );
 
 
@@ -258,20 +283,13 @@ registerFileLabel : registerfile port map(
 -- Rsrc1 <= Instruction(10 downto 8);
 -- Rsrc2 <= Instruction(7 downto 5);
 
-controlUnitLabel : controlUnit port map(Instruction(15 downto 11),s_outputControl);
+controlUnitLabel : controlUnit port map(bo_fd_instruction(15 downto 11),s_outputControl);
+
 
 
 -------------------------------------------------------------------
 
 -- STAGE 3 
--- Component mux4x1 is 
--- 	Generic (n: integer :=16);
---     port (
---             i_0,i_1,i_2,i_3: in std_logic_vector(n-1 downto 0);
---             i_s:in std_logic_vector(1 downto 0);
---             o_selected :out std_logic_vector(n-1 downto 0)
---         ); 
--- end Component;
                                             -- op 2 and 3 are forwarded data from mem and previous alu
                                             -- op4 is never accessed
                                             -- selector comes from forwarding unit not control unit

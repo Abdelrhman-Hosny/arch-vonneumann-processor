@@ -10,7 +10,59 @@ entity processor is
 end processor ;
 
 architecture arch of processor is
+-------------------------------------------------------------------
+-- Buffers
+-- IF/ID
+component fetchDecode
+port(
+        clk           : IN STD_LOGIC ; 
+		-- inputs to buffer
+        i_Instruction : IN STD_LOGIC_VECTOR(15 downto 0) ;
+		    i_immediate   : IN STD_LOGIC_VECTOR(15 downto 0);
+        i_PC_plus_one : IN STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
+        i_enable      : IN STD_LOGIC ;
+        i_F_Flush     : IN STD_LOGIC ;
+        
+        -- outputs 
+        o_Instruction : OUT STD_LOGIC_VECTOR(15 downto 0) ;
+	    	o_immediate   : OUT STD_LOGIC_VECTOR(15 downto 0);
+        o_PC_plus_one : OUT STD_LOGIC_VECTOR(15 downto 0 ) 
 
+);
+end component;
+-- IF/ID Signals
+signal bo_fd_instruction, bo_fd_immediate, bo_fd_PC_plus_one : STD_LOGIC_VECTOR(15 downto 0) ;
+----------------------------
+-- ID / EX 
+component decodeExecBuffer
+port(
+      clk                 : IN STD_LOGIC ; 
+      -- inputs to buffer
+      i_readData1, i_readData2 : IN std_logic_vector( 31 downto 0);
+      i_readData1Address, i_readData2Address : IN std_logic_vector(2 downto 0);
+      i_writeAddress1 : IN std_logic_vector( 2 downto 0);
+      i_PCNext : IN std_logic_vector(15 downto 0 );
+      i_aluOPCode : IN std_logic_vector(3 downto 0);
+      i_cuSignals : IN std_logic_vector(16 downto 0);
+      i_immediate : IN std_logic_vector(31 downto 0);
+      -- output to buffer
+      o_readData1         , o_readData2 : OUT std_logic_vector( 31 downto 0);
+      o_readData1Address, o_readData2Address : OUT std_logic_vector(2 downto 0);
+      o_writeAddress1          : OUT std_logic_vector( 2 downto 0);
+      o_PCNext                 : OUT std_logic_vector(15 downto 0 );
+      o_aluOPCode               : OUT std_logic_vector(3 downto 0);
+      o_cuSignals              : OUT std_logic_vector(16 downto 0);
+      o_immediate              : OUT std_logic_vector(31 downto 0)
+);
+
+end component;
+
+signal bo_de_readData1, bo_de_readData2 : std_logic_vector( 31 downto 0);
+signal bo_de_writeAddress1, bo_de_readData1Address , bo_de_readData2Address : std_logic_vector( 2 downto 0 );
+signal bo_de_PCNext : std_logic_vector( 15 downto 0 );
+signal bo_de_cuSignals : std_logic_vector (16 downto 0);
+signal bo_de_aluOPCode : std_logic_vector (3 downto 0);
+signal bo_de_immediate : std_logic_vector( 31 downto 0);
 -------------------------------------------------------------------
 -- STAGE 1 COMPONENTS & SIGNALS
 
@@ -100,7 +152,7 @@ Signal Instruction : std_logic_vector(15 DOWNTO 0); -- o_dataout
 
 -- we will need to extract data from PC+1 also (immediate)
 Signal Immediate : std_logic_vector(15 DOWNTO 0); -- o_immediate
-signal extendedImmediate : std_logic_vector(31 downto 0 );
+signal bi_de_extendedImmediate : std_logic_vector(31 downto 0 );
 
 -------------------------------------------------------------------
 
@@ -243,45 +295,58 @@ registerPC : My_nDFF_PC generic map(16) port map (CLK,'0','1',MuxPCOutput,PC); -
 
 instructionMemory : ram port map (PC,Instruction,Immediate);
 
+buffer_fetchDecode : fetchDecode port map(clk, 
+                                          Instruction, Immediate,PC_plus_one,
+                                          '1', '0',
+                                          bo_fd_instruction,bo_fd_immediate,bo_fd_PC_plus_one );
 -------------------------------------------------------------------
 
 --STAGE 2
 
 
 registerFileLabel : registerfile port map(
-  CLK,s_outputControl(0),Instruction(10 downto 8),Instruction(7 downto 5),readData1,readData2,"000",x"00000000"
+  CLK,s_outputControl(0),bo_fd_instruction(10 downto 8),bo_fd_instruction(7 downto 5),readData1,readData2,"000",x"00000000"
   );
 
 
-
+  bi_de_extendedImmediate <= std_logic_vector(resize( signed(bo_fd_immediate), 32) ) ; 
 -- Rdst  <= Instruction(10 downto 8);
 -- Rsrc1 <= Instruction(10 downto 8);
 -- Rsrc2 <= Instruction(7 downto 5);
 
-controlUnitLabel : controlUnit port map(Instruction(15 downto 11),s_outputControl);
+controlUnitLabel : controlUnit port map(bo_fd_instruction(15 downto 11),s_outputControl);
 
+
+buffer_decodeExec: decodeExecBuffer port map(
+  clk,
+  readData1,readData2,
+  bo_fd_instruction(10 downto 8),bo_fd_instruction(7 downto 5), -- readAddress 1 and 2
+  bo_fd_instruction(10 downto 8), -- writeAddress1
+  bo_fd_PC_plus_one,
+  bo_fd_instruction(4 downto 1),
+  s_outputControl,
+  bi_de_extendedImmediate,
+  bo_de_readData1, bo_de_readData2,
+  bo_de_readData1Address, bo_de_readData2Address,
+  bo_de_PCNext,
+  bo_de_aluOPCode,
+  bo_de_cuSignals,
+  bo_de_immediate
+);
 
 -------------------------------------------------------------------
 
 -- STAGE 3 
--- Component mux4x1 is 
--- 	Generic (n: integer :=16);
---     port (
---             i_0,i_1,i_2,i_3: in std_logic_vector(n-1 downto 0);
---             i_s:in std_logic_vector(1 downto 0);
---             o_selected :out std_logic_vector(n-1 downto 0)
---         ); 
--- end Component;
                                             -- op 2 and 3 are forwarded data from mem and previous alu
                                             -- op4 is never accessed
                                             -- selector comes from forwarding unit not control unit
-aluMux1 : mux4x1  generic map(32) port map(readData1, x"00000000", x"00000000", x"00000000", "00", aluOperand1);
-aluMux2 : mux4x1  generic map(32) port map(readData2, x"00000000", x"00000000", x"00000000", "00", aluOperand2TempHolder);
+aluMux1 : mux4x1  generic map(32) port map(bo_de_readData1, x"00000000", x"00000000", x"00000000", "00", aluOperand1);
+aluMux2 : mux4x1  generic map(32) port map(bo_de_readData2, x"00000000", x"00000000", x"00000000", "00", aluOperand2TempHolder);
                                                                           -- selector should be replaced
                                                                           -- with immediate or reg decider from cu
-extendedImmediate <= std_logic_vector(resize( signed(immediate), 32) ) ; 
-aluMux3 : mux2x1  generic map(32) port map(aluOperand2TempHolder, extendedImmediate, '0', aluOperand2);
-aluLabel : ALU port map (aluOperand1, aluOperand2, s_aluOutput , Instruction(4 downto 1) , s_aluCout, Immediate(15 downto 11) );
+
+aluMux3 : mux2x1  generic map(32) port map(aluOperand2TempHolder, bo_de_immediate, '0', aluOperand2);
+aluLabel : ALU port map (aluOperand1, aluOperand2, s_aluOutput , bo_de_aluOPCode , s_aluCout, bo_de_immediate );
 -- readData1, readData2 must be changed to be output from muxes 
 -- we just made it now for testing
 

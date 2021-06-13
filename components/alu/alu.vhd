@@ -75,7 +75,7 @@ o_output <= s_tempOutput(31 downto 0);
 o_ZeroFlag  <= '1' when s_tempOutput(31 downto 0) = x"00000000" else
                '0' ;
 
-o_NegFlag    : '1' when s_tempOutput(31) = '1' else
+o_NegFlag    <= '1' when s_tempOutput(31) = '1' else
                '0' ;
 
 end architecture ; -- arch

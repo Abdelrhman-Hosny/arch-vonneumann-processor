@@ -288,27 +288,27 @@ signal s_aluNegFlag     : STD_LOGIC;
 
 -- FLAG REGISTER
 component My_nDFF_CCR IS
-        PORT(
-                CCR_Enable   : IN STD_LOGIC := '0'; -- CCR ENABLE : Enable for neg , zero (initialized with zero)
-                Carry_Enable : IN STD_LOGIC := '0'; -- enable for carry flag only (initialized with zero)
+            PORT(
+              CCR_Enable   : IN STD_LOGIC := '0'; -- CCR ENABLE : Enable for neg , zero (initialized with zero)
+              Carry_Enable : IN STD_LOGIC := '0'; -- enable for carry flag only (initialized with zero)
 
-                -- in ALU operations 
-                    -- CCR_enable is opened directly each alu operation as they are changed in all alu operations
-                    -- while carry_enable is opened only if operation change it 
-                D         : IN STD_LOGIC_VECTOR(3 downto 0) := (others =>'0') ; -- initialized with zeros
-                            -- bit 0 : CF
-                            -- bit 1 : NF
-                            -- bit 2 : ZF
-                            -- bit 3 : -- (always zero)
+              -- in ALU operations 
+                  -- CCR_enable is opened directly each alu operation as they are changed in all alu operations
+                  -- while carry_enable is opened only if operation change it 
+              D         : IN STD_LOGIC_VECTOR(2 downto 0) := (others =>'0') ; -- initialized with zeros
+                          -- bit 0 : CF
+                          -- bit 1 : NF
+                          -- bit 2 : ZF
 
-                Q         : OUT STD_LOGIC_VECTOR(3 downto 0):= (others =>'0') ; -- initialized with zeros
-                carrySet  : IN STD_LOGIC := '0';
-                carryReset: IN STD_LOGIC := '0'
+              Q         : OUT STD_LOGIC_VECTOR(2 downto 0):= (others =>'0') ; -- initialized with zeros
+              carrySet  : IN STD_LOGIC := '0';
+              carryReset: IN STD_LOGIC := '0'
             );
 END component;
 
 -- FLAG REGISTER Signals: 
-signal FlagRegisterOut :STD_LOGIC_VECTOR(3 downto 0) ; 
+signal FlagRegisterOut :STD_LOGIC_VECTOR(2 downto 0) ; 
+signal FlagRegisterIn :STD_LOGIC_VECTOR(2 downto 0) ; 
 
 
 
@@ -481,8 +481,9 @@ aluLabel : ALU port map (
                   ,s_aluZeroFlag, s_aluNegFlag);
 
 
+FlagRegisterIn <= s_aluZeroFlag & s_aluNegFlag & s_aluCout ; 
 FlagRegister : My_nDFF_CCR port map (bo_de_cuSignals(9),s_aluCarryEnable
-                                      ,'0' & s_aluZeroFlag & s_aluNegFlag & s_aluCout
+                                      ,FlagRegisterIn
                                       ,FlagRegisterOut
                                       ,bo_de_cuSignals(15),bo_de_cuSignals(16));
 

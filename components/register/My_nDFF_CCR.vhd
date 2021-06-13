@@ -17,13 +17,12 @@ entity My_nDFF_CCR IS
                 -- in ALU operations 
                     -- CCR_enable is opened directly each alu operation as they are changed in all alu operations
                     -- while carry_enable is opened only if operation change it 
-                D         : IN STD_LOGIC_VECTOR(3 downto 0) := (others =>'0') ; -- initialized with zeros
+                D         : IN STD_LOGIC_VECTOR(2 downto 0) := (others =>'0') ; -- initialized with zeros
                             -- bit 0 : CF
                             -- bit 1 : NF
                             -- bit 2 : ZF
-                            -- bit 3 : -- (always zero)
 
-                Q         : OUT STD_LOGIC_VECTOR(3 downto 0):= (others =>'0') ; -- initialized with zeros
+                Q         : OUT STD_LOGIC_VECTOR(2 downto 0):= (others =>'0') ; -- initialized with zeros
                 carrySet  : IN STD_LOGIC := '0';
                 carryReset: IN STD_LOGIC := '0'
             );

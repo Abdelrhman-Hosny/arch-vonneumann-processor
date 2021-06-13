@@ -383,6 +383,21 @@ END Component;
 Signal wbData : std_logic_vector(31 downto 0);
 
 -------------------------------------------------------------------
+-- Hazards
+
+-- Forwarding unit
+component forwardingUnit
+port(
+  i_de_readData1Address, i_de_readData2Address : IN std_logic_vector(2 downto 0 );
+  i_em_writeBackSignal : IN std_logic;
+  i_em_writeAddress :  IN std_logic_vector(2 downto 0 );
+  i_mw_writeBackSignal : IN std_logic;
+  i_mw_writeAddress :  IN std_logic_vector(2 downto 0 );
+  o_aluOperand1Selector, o_aluOperand2Selector  : OUT std_logic_vector(1 downto 0)
+);
+end component;
+
+signal fwdUnit_alu1Selector, fwdUnit_alu2Selector : std_logic_vector( 1 downto 0);
 
 
 begin
@@ -455,8 +470,8 @@ buffer_decodeExec: decodeExecBuffer port map(
                                             -- op 2 and 3 are forwarded data from mem and previous alu
                                             -- op4 is never accessed
                                             -- selector comes from forwarding unit not control unit
-aluMux1 : mux4x1  generic map(32) port map(bo_de_readData1, x"00000000", x"00000000", x"00000000", "00", aluOperand1);
-aluMux2 : mux4x1  generic map(32) port map(bo_de_readData2, x"00000000", x"00000000", x"00000000", "00", aluOperand2TempHolder);
+aluMux1 : mux4x1  generic map(32) port map(bo_de_readData1, bo_em_aluOutput, bo_mw_memoryData, x"00000000", fwdUnit_alu1Selector, aluOperand1);
+aluMux2 : mux4x1  generic map(32) port map(bo_de_readData2, bo_em_aluOutput, bo_mw_memoryData, x"00000000", fwdUnit_alu2Selector, aluOperand2TempHolder);
                                                                           -- selector should be replaced
                                                                           -- with immediate or reg decider from cu
 
@@ -547,6 +562,15 @@ muxWB : mux4x1 generic map (32) port map (
 );
 
 -------------------------------------------------------------------
+-- Hazards
 
+-- Forwarding unit
+
+fwdUnit : forwardingUnit port map(
+                  bo_de_readData1Address , bo_de_readData2Address,
+                  bo_em_controlSignals(0), bo_em_writeAddress1,
+                  bo_mw_controlSignals(0), bo_mw_writeAddress,
+                  fwdUnit_alu1Selector, fwdUnit_alu2Selector
+                  );
 
 end architecture ; -- arch

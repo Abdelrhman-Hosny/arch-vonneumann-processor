@@ -8,7 +8,10 @@ entity ALU is
     i_operand2    : IN STD_LOGIC_VECTOR (31 downto 0);
     o_output      : OUT STD_LOGIC_VECTOR (31 downto 0);
     i_opCode      : IN STD_LOGIC_VECTOR(3 downto 0);
-    o_Cout          : OUT STD_LOGIC
+    o_Cout        : OUT STD_LOGIC;
+    o_CarryEnable : OUT STD_LOGIC;
+    o_ZeroFlag    : OUT STD_LOGIC;
+    o_NegFlag    : OUT STD_LOGIC
   );
 end ALU ;
 
@@ -64,8 +67,15 @@ o_Cout <= s_tempOutput(32) when i_opCode="0100" or i_opCode="0100" else -- ADD/S
           i_operand1(0)    when i_opCode="0111" else -- SHR
           i_operand1(31)    when i_opCode="1000" ;  -- SHL
           
+o_CarryEnable <=  '1' when i_opCode="0100" or i_opCode="0100" or  i_opCode="0111" or i_opCode="1000" else
+                  '0';
 
 o_output <= s_tempOutput(31 downto 0); 
 
+o_ZeroFlag  <= '1' when s_tempOutput(31 downto 0) = x"00000000" else
+               '0' ;
+
+o_NegFlag    : '1' when s_tempOutput(31) = '1' else
+               '0' ;
 
 end architecture ; -- arch

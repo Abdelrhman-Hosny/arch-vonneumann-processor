@@ -437,7 +437,7 @@ registerFileLabel : registerfile port map(
 );
 
 
-bi_de_extendedImmediate <= std_logic_vector(resize( signed(bo_fd_immediate), 32) ) ; 
+bi_de_extendedImmediate <= std_logic_vector(resize( unsigned(bo_fd_immediate), 32) ) ; 
 -- Rdst  <= Instruction(10 downto 8);
 -- Rsrc1 <= Instruction(10 downto 8);
 -- Rsrc2 <= Instruction(7 downto 5);

@@ -182,7 +182,8 @@ begin
     end if ;
     
     -- non memory ALU operations
-    if i_instruction(4 downto 3) = "00" or i_instruction = "01000" then
+    -- NOT OR AND DEC ADD SUB INC SHR SHL IADD
+    if i_instruction(4 downto 3) = "00" or i_instruction = "01000" or i_instruction = "11000" then
         s_wbEnable <= '1';
         s_wbSelector <= "01";
         s_SPEnable <= '0';

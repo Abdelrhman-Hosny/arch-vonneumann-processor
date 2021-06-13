@@ -14,8 +14,8 @@ END My_nDFF_OUTPORT;
 
 Architecture a_nMY_DFF OF My_nDFF_OUTPORT IS
 BEGIN
-      with W_Enable select 
-      Q <= D when '1';
+      
+      Q <= D when  W_Enable='1';
 
 end a_nMY_DFF;
 

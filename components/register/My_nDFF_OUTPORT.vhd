@@ -14,12 +14,9 @@ END My_nDFF_OUTPORT;
 
 Architecture a_nMY_DFF OF My_nDFF_OUTPORT IS
 BEGIN
-	process (W_Enable)
-	begin
-		IF (W_Enable ='1') THEN
-			Q<=D;
-		END IF;
-	end process;
+      with W_Enable select 
+      Q <= D when '1';
+
 end a_nMY_DFF;
 
 

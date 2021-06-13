@@ -28,6 +28,7 @@ begin
   s_tempOutput <= s_input1 AND s_input2 when i_opCode="0000" else
               s_input1 OR s_input2 when i_opCode="0001" else
               NOT s_input1 when i_opCode="0010" else 
+              s_input2 when i_opCode="1001" else --MOV
               -- DEC
               std_logic_vector(resize(unsigned(i_operand1),33) - resize(unsigned(std_logic_vector'(X"1")),33))
                when i_opCode="0011" else

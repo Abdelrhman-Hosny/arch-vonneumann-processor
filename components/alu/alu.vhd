@@ -36,7 +36,7 @@ begin
               std_logic_vector(resize(unsigned(i_operand1),33) + resize(unsigned(i_operand2),33))
                  when i_opCode="0100" else
               -- SUB
-              std_logic_vector(resize(unsigned(i_operand1),33) - resize(unsigned(i_operand2),33))
+              std_logic_vector(resize(unsigned(i_operand2),33) - resize(unsigned(i_operand1),33))
               when i_opCode="0101" else
               -- INC 
               std_logic_vector(resize(unsigned(i_operand1),33) + resize(unsigned(std_logic_vector'(X"1")),33)) when i_opCode="0110" else

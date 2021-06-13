@@ -62,14 +62,14 @@ registerAddress = {
                 }
 # file name
 rootDir = 'arch-vonneumann-processor\\archAssembler\\'
-fileName= 'oneOperand'
+fileName= 'twoOperand'
 # instructions in the end
 instructions= []
 instructionsOrder = []
 currentMemoryIndex = None
 
 # reading file
-with open(rootDir+fileName+ '.asm', 'r') as f:
+with open(rootDir + fileName+ '.asm', 'r') as f:
     lines = f.readlines()
     for line in lines:
         # removes spaces
@@ -113,13 +113,19 @@ with open(rootDir+fileName+ '.asm', 'r') as f:
             if ( operationOperands[1] in registerAddress.keys()):
                 registerAddress2 = registerAddress[operationOperands[1]]
                 immediateTemp = None
+                instructions.append(opCodeTemp + registerAddress2 + registerAddress1 + aluOpCodeTemp + '0')
             else:
                 immediateTemp = operationOperands[1]
                 registerAddress2 = '000'
+                instructions.append(opCodeTemp + registerAddress1 + registerAddress2 + aluOpCodeTemp + '0')
             # adds instruction 1 to instructions list
-            instructions.append(opCodeTemp + registerAddress1 + registerAddress2 + aluOpCodeTemp + '0')
+            
             # if there's an immediate add it to the list
-            if (immediateTemp != None): instructions.append(bin(int('0x' + immediateTemp.lower(), 16)))
+            if (immediateTemp != None):
+                instructions.append(bin(int('0x' + immediateTemp.lower(), 16)))
+                instructionsOrder.append(currentMemoryIndex)
+                currentMemoryIndex += 1
+                
 
         else:
             # for the instruction after org
@@ -130,7 +136,8 @@ with open(rootDir+fileName+ '.asm', 'r') as f:
             
 instructionsHex = [ hex(int(i,2)).upper()[2:] for i in instructions ]
 
-print(zip(instructionsHex, instructionsOrder))
+
+
 with open(rootDir + fileName + '.do', 'w') as f:
     for line in startingLines:
         f.write(line)

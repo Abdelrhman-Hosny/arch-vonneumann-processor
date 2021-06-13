@@ -30,23 +30,18 @@ END My_nDFF_CCR;
 
 Architecture a_nMY_DFF OF My_nDFF_CCR IS
 BEGIN
-	process (CCR_Enable,Carry_Enable,carrySet,carryReset)
-    -- Our design assumes CarrySet,Reset happens 
-    -- without depending on W_enable
-	begin
-        IF (carrySet='1') then
-            Q(0)<='1';   -- setting cf = 1;
-        ELSIF (carryReset='1') then
-            Q(0)<='0';   -- setting cf = 0 ;
-        END IF;
 
-        IF (CCR_Enable ='1') THEN
-			Q(2 downto 1) <= D(2 downto 1); -- setting ZF,NF
-		END IF;
-        IF (Carry_Enable = '1') Then 
-            Q(0) <= D(0); -- setting CF 
-        END IF;
-	end process;
+    -- Carry set and reset 
+   
+        Q(0)<='1' when  carrySet='1' else
+              '0' when  carryReset='1' else
+              D(0) when (Carry_Enable = '1') ;    -- Carry Enables 
+
+    -- CCR Enables ( NEG / ZERO )
+        Q(2 downto 1) <= D(2 downto 1) when (CCR_Enable ='1');
+
+
+
 end a_nMY_DFF;
 
 

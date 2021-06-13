@@ -265,19 +265,52 @@ Signal s_outputControl : std_logic_vector(16 downto 0) ;
 
 -- ALU
 Component ALU is
-    port (
-      i_operand1    : IN STD_LOGIC_VECTOR (31 downto 0);
-      i_operand2    : IN STD_LOGIC_VECTOR (31 downto 0);
-      o_output      : OUT STD_LOGIC_VECTOR (31 downto 0);
-      i_opCode      : IN STD_LOGIC_VECTOR(3 downto 0);
-      o_Cout          : OUT STD_LOGIC
-    );
+      port (
+        i_operand1    : IN STD_LOGIC_VECTOR (31 downto 0);
+        i_operand2    : IN STD_LOGIC_VECTOR (31 downto 0);
+        o_output      : OUT STD_LOGIC_VECTOR (31 downto 0);
+        i_opCode      : IN STD_LOGIC_VECTOR(3 downto 0);
+        o_Cout        : OUT STD_LOGIC;
+        o_CarryEnable : OUT STD_LOGIC;
+        o_ZeroFlag    : OUT STD_LOGIC;
+        o_NegFlag    : OUT STD_LOGIC
+      );
 end Component ;
 
 -- Signals 
 Signal s_aluOutput : STD_LOGIC_VECTOR (31 downto 0);
 Signal s_aluCout   : STD_LOGIC;
 signal aluOperand1, aluOperand2, aluOperand2TempHolder :  STD_LOGIC_VECTOR (31 downto 0);
+signal s_aluCarryEnable : STD_LOGIC;
+signal s_aluZeroFlag    : STD_LOGIC;
+signal s_aluNegFlag     : STD_LOGIC;
+
+
+-- FLAG REGISTER
+component My_nDFF_CCR IS
+        PORT(
+                CCR_Enable   : IN STD_LOGIC := '0'; -- CCR ENABLE : Enable for neg , zero (initialized with zero)
+                Carry_Enable : IN STD_LOGIC := '0'; -- enable for carry flag only (initialized with zero)
+
+                -- in ALU operations 
+                    -- CCR_enable is opened directly each alu operation as they are changed in all alu operations
+                    -- while carry_enable is opened only if operation change it 
+                D         : IN STD_LOGIC_VECTOR(3 downto 0) := (others =>'0') ; -- initialized with zeros
+                            -- bit 0 : CF
+                            -- bit 1 : NF
+                            -- bit 2 : ZF
+                            -- bit 3 : -- (always zero)
+
+                Q         : OUT STD_LOGIC_VECTOR(3 downto 0):= (others =>'0') ; -- initialized with zeros
+                carrySet  : IN STD_LOGIC := '0';
+                carryReset: IN STD_LOGIC := '0'
+            );
+END component;
+
+-- FLAG REGISTER Signals: 
+signal FlagRegisterOut :STD_LOGIC_VECTOR(3 downto 0) ; 
+
+
 
 -- OUT PORT 
 Component My_nDFF_OUTPORT IS
@@ -428,7 +461,16 @@ aluMux2 : mux4x1  generic map(32) port map(bo_de_readData2, x"00000000", x"00000
                                                                           -- with immediate or reg decider from cu
 
 aluMux3 : mux2x1  generic map(32) port map(aluOperand2TempHolder, bo_de_immediate, '0', aluOperand2);
-aluLabel : ALU port map (aluOperand1, aluOperand2, s_aluOutput , bo_de_aluOPCode , s_aluCout );
+aluLabel : ALU port map (
+                  aluOperand1, aluOperand2, s_aluOutput , bo_de_aluOPCode , s_aluCout,s_aluCarryEnable
+                  ,s_aluZeroFlag, s_aluNegFlag);
+
+
+FlagRegister : My_nDFF_CCR port map (bo_de_cuSignals(9),s_aluCarryEnable
+                                      ,'0' & s_aluZeroFlag & s_aluNegFlag & s_aluCout
+                                      ,FlagRegisterOut
+                                      ,bo_de_cuSignals(15),bo_de_cuSignals(16));
+
 
 bi_em_controlSignals <=  bo_de_cuSignals(13) & bo_de_cuSignals(6 downto 0);
 -- readData1, readData2 must be changed to be output from muxes 

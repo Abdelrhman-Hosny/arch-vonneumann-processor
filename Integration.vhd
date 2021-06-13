@@ -476,7 +476,7 @@ aluMux2 : mux4x1  generic map(32) port map(bo_de_readData2, bo_em_aluOutput, wbD
                                                                           -- selector should be replaced
                                                                           -- with immediate or reg decider from cu
 
-aluMux3 : mux2x1  generic map(32) port map(aluOperand2TempHolder, bo_de_immediate, '0', aluOperand2);
+aluMux3 : mux2x1  generic map(32) port map(aluOperand2TempHolder, bo_de_immediate, bo_de_cuSignals(11), aluOperand2);
 aluLabel : ALU port map (
                   aluOperand1, aluOperand2, s_aluOutput , bo_de_aluOPCode , s_aluCout,s_aluCarryEnable
                   ,s_aluZeroFlag, s_aluNegFlag);

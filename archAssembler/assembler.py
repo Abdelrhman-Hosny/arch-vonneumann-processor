@@ -1,3 +1,10 @@
+# starts sim and adds clock
+startingLines = [
+    'vsim -gui work.processor',
+    'add wave -position insertpoint  \\',
+    'sim:/processor/CLK',
+    'force -freeze sim:/processor/CLK 1 0, 0 {100 ps} -r 200'
+]
 # mapping from instruction to op Code and ALU OPCode
 opToOpCodeReset = {
             'RESET': '10111' 
@@ -53,15 +60,17 @@ registerAddress = {
                 'R6' : '110' ,
                 'R7' : '111' 
                 }
-
+print()
 # file name
-fileName= 'oneOperand.asm'
+rootDir = 'arch-vonneumann-processor\\archAssembler\\'
+fileName= 'oneOperand'
 # instructions in the end
 instructions= []
+instructionsOrder = []
 currentMemoryIndex = None
 
 # reading file
-with open(fileName,'r') as f:
+with open(rootDir+fileName+ '.asm', 'r') as f:
     lines = f.readlines()
     for line in lines:
         # removes spaces
@@ -116,8 +125,18 @@ with open(fileName,'r') as f:
         else:
             # for the instruction after org
             instructions.append(bin(int('0x' + lineArray[0].lower(), 16)))
+        instructionsOrder.append(currentMemoryIndex)
         # increment memroy address to write into after instruction
         if(currentMemoryIndex != None): currentMemoryIndex += 1
             
 instructionsHex = [ hex(int(i,2)).upper()[2:] for i in instructions ]
-print(instructionsHex)
+
+print(zip(instructionsHex, instructionsOrder))
+with open(rootDir + fileName + '.do', 'w') as f:
+    for line in startingLines:
+        f.write(line)
+        f.write('\n')
+    
+    for (instruction , instructionOrder) in zip(instructionsHex, instructionsOrder) :
+        f.write('mem load -filltype value -filldata {} -fillradix hexadecimal /processor/instructionMemory/ram({})'.format(instruction, instructionOrder))
+        f.write('\n')

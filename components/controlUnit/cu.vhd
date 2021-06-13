@@ -4,7 +4,7 @@ use ieee.std_logic_1164.all;
 entity controlUnit is
   port (
     i_instruction : IN std_logic_vector(4 downto 0);
-    o_outputControl : OUT std_logic_vector(16 downto 0)
+    o_outputControl : OUT std_logic_vector(16 downto 0)  := (others =>'0')
   ) ;
 end controlUnit ;
 

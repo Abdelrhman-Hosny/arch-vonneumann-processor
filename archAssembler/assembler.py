@@ -60,7 +60,6 @@ registerAddress = {
                 'R6' : '110' ,
                 'R7' : '111' 
                 }
-print()
 # file name
 rootDir = 'arch-vonneumann-processor\\archAssembler\\'
 fileName= 'oneOperand'

@@ -60,7 +60,7 @@ end component;
 signal bo_de_readData1, bo_de_readData2 : std_logic_vector( 31 downto 0);
 signal bo_de_writeAddress1, bo_de_readData1Address , bo_de_readData2Address : std_logic_vector( 2 downto 0 );
 signal bo_de_PCNext : std_logic_vector( 15 downto 0 );
-signal bo_de_cuSignals : std_logic_vector (16 downto 0);
+signal bo_de_cuSignals : std_logic_vector (16 downto 0)  := (others =>'0');
 signal bo_de_aluOPCode : std_logic_vector (3 downto 0);
 signal bo_de_immediate : std_logic_vector( 31 downto 0);
 ------------------------------------
@@ -88,9 +88,9 @@ end component;
 -- EX MEM Signals
 
 
-signal bi_em_controlSignals, bo_em_controlSignals : std_logic_vector(7 downto 0);
+signal bi_em_controlSignals, bo_em_controlSignals : std_logic_vector(7 downto 0)  := (others =>'0') ;
 
-signal bo_em_aluOutput, bo_em_readData1 : std_logic_vector(31 downto 0);
+signal bo_em_aluOutput, bo_em_readData1, bi_em_alu_iport : std_logic_vector(31 downto 0);
 signal bo_em_PCNext : std_logic_vector(15 downto 0);
 signal bo_em_writeAddress1 : std_logic_vector(2 downto 0);
 ---------------------------
@@ -114,7 +114,7 @@ end component;
 
 -- MEM WB Buffer
 signal bo_mw_aluData, bo_mw_memoryData : STD_LOGIC_VECTOR(31 downto 0);
-signal bo_mw_controlSignals, bo_mw_writeAddress : STD_LOGIC_VECTOR(2 downto 0);
+signal bo_mw_controlSignals, bo_mw_writeAddress : STD_LOGIC_VECTOR(2 downto 0)  := (others =>'0') ;
 
 -------------------------------------------------------------------
 -- STAGE 1 COMPONENTS & SIGNALS
@@ -437,10 +437,11 @@ registerFileLabel : registerfile port map(
 );
 
 
-  bi_de_extendedImmediate <= std_logic_vector(resize( signed(bo_fd_immediate), 32) ) ; 
+bi_de_extendedImmediate <= std_logic_vector(resize( signed(bo_fd_immediate), 32) ) ; 
 -- Rdst  <= Instruction(10 downto 8);
 -- Rsrc1 <= Instruction(10 downto 8);
 -- Rsrc2 <= Instruction(7 downto 5);
+
 
 controlUnitLabel : controlUnit port map(bo_fd_instruction(15 downto 11),s_outputControl);
 
@@ -470,8 +471,8 @@ buffer_decodeExec: decodeExecBuffer port map(
                                             -- op 2 and 3 are forwarded data from mem and previous alu
                                             -- op4 is never accessed
                                             -- selector comes from forwarding unit not control unit
-aluMux1 : mux4x1  generic map(32) port map(bo_de_readData1, bo_em_aluOutput, bo_mw_memoryData, x"00000000", fwdUnit_alu1Selector, aluOperand1);
-aluMux2 : mux4x1  generic map(32) port map(bo_de_readData2, bo_em_aluOutput, bo_mw_memoryData, x"00000000", fwdUnit_alu2Selector, aluOperand2TempHolder);
+aluMux1 : mux4x1  generic map(32) port map(bo_de_readData1, bo_em_aluOutput, wbData, x"00000000", fwdUnit_alu1Selector, aluOperand1);
+aluMux2 : mux4x1  generic map(32) port map(bo_de_readData2, bo_em_aluOutput, wbData, x"00000000", fwdUnit_alu2Selector, aluOperand2TempHolder);
                                                                           -- selector should be replaced
                                                                           -- with immediate or reg decider from cu
 
@@ -487,13 +488,18 @@ FlagRegister : My_nDFF_CCR port map (bo_de_cuSignals(9),s_aluCarryEnable
                                       ,FlagRegisterOut
                                       ,bo_de_cuSignals(15),bo_de_cuSignals(16));
 
+-- I/P PORT
+IP_PORT : My_nDFF_INPORT generic map(32) port map('0',IPPort_Input,IPPort_Output);
+
+
+muxALU_IPport:  mux2x1 generic map(32) port map(s_aluOutput, IPPort_Output, bo_de_cuSignals(2), bi_em_alu_iport );
 
 bi_em_controlSignals <=  bo_de_cuSignals(13) & bo_de_cuSignals(6 downto 0);
 -- readData1, readData2 must be changed to be output from muxes 
 -- we just made it now for testing
 buffer_execMemory: execMemory port map( clk,
                                         -- inputs
-                                        s_aluOutput,
+                                        bi_em_alu_iport,
                                         bo_de_PCNext,
                                         bo_de_readData1,
                                         bi_em_controlSignals,-- control signals
@@ -508,7 +514,7 @@ buffer_execMemory: execMemory port map( clk,
 
 
 -- OUTPORT 
-OUT_PORT : My_nDFF_OUTPORT generic map(32) port map (bo_de_cuSignals(12),bo_de_readData1,OUTPORT_output);
+OUT_PORT : My_nDFF_OUTPORT generic map(32) port map (bo_de_cuSignals(12), aluOperand1, OUTPORT_output);
 
 
 -------------------------------------------------------------------
@@ -553,13 +559,10 @@ buffer_memWB : memoryWB port map( clk,
 
 -- STAGE 5 
 
--- I/P PORT
-IP_PORT : My_nDFF_INPORT generic map(32) port map('0',IPPort_Input,IPPort_Output);
-
 
 --WBmux
 muxWB : mux4x1 generic map (32) port map (
-  bo_mw_memoryData, bo_mw_aluData, IPPort_Output,(others=>'0'),bo_mw_controlSignals(2 downto 1), wbData
+  bo_mw_memoryData, bo_mw_aluData, bo_mw_aluData,(others=>'0'),bo_mw_controlSignals(2 downto 1), wbData
 );
 
 -------------------------------------------------------------------

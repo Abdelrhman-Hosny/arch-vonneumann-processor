@@ -150,7 +150,7 @@ begin
         s_wbEnable <= '0';
         s_wbSelector <= "00";
         -- ccr Enable
-        s_ccrEnable <= '1';
+        s_ccrEnable <= '0';
 
 
     else
@@ -169,7 +169,7 @@ begin
         s_wbEnable <= '0';
         s_wbSelector <= "00";
         -- ccr Enable
-        s_ccrEnable <= '1';
+        s_ccrEnable <= '0';
     else
         s_resetCarryFlag <= '0';
     end if ;

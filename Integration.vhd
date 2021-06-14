@@ -344,7 +344,16 @@ Signal OUTPORT_output : STD_LOGIC_VECTOR(31 downto 0);
 -- SP REGISTER signals 
     -- operands : O/P from adderSP 
     -- SP : O/P from My_nDFF_PC 
-Signal SP : std_logic_vector(31 DOWNTO 0) := x"000FFFFE";
+component My_nDFF_SP IS
+  Generic (n: integer :=16);
+  PORT(
+        CLK,RST,W_Enable: IN STD_LOGIC ;
+              D : IN STD_LOGIC_VECTOR(n-1 downto 0) ;
+              Q : OUT STD_LOGIC_VECTOR(n-1 downto 0):=(others=>'0')
+        );
+END component;
+
+Signal SP : std_logic_vector(31 DOWNTO 0) := (0=>'0',others =>'1' );
 
 
 -- we have 2 mux2x1 before Memory 
@@ -361,7 +370,7 @@ Signal Data_IP : std_logic_vector(31 DOWNTO 0) := (others =>'0');
 -- LITTLE_ENDIAN dataMemory
 Component dataMemory IS
 PORT (
-		CLK             : IN std_logic;
+		    CLK             : IN std_logic;
         i_writeEnable   : IN std_logic;
         i_readEnable    : IN std_logic;
         i_address       : IN std_logic_vector(31 DOWNTO 0); -- depends onsize of memory 
@@ -538,32 +547,37 @@ OUT_PORT : My_nDFF_OUTPORT generic map(32) port map (bo_de_cuSignals(12), aluOpe
 -- STAGE 4
 
 -- SP REGION 
--- decide whether to add 2 or -2 based on instruction
-valueDeciderForSP : process(CLK)
-begin 
-    IF ( bo_em_controlSignals(6) = '1' ) THEN                 -- Will be removed CU and be from buffer
-			  valSP <= 2;
-	  ELSE
-        valSP <= -2;
-    END IF;
-end process ; -- valueDeciderForSP
+-- -- decide whether to add 2 or -2 based on instruction
+-- valueDeciderForSP : process(CLK)
+-- begin 
+--     IF ( bo_em_controlSignals(5) = '1' ) THEN                 -- Will be removed CU and be from buffer
+-- 			  valSP <= 2;
+-- 	  ELSE
+--         valSP <= -2;
+--     END IF;
+-- end process ; -- valueDeciderForSP
 
 -- SP Adder
+valSP <= 2 when bo_em_controlSignals(5) = '1' else
+        -2 ;
+
 adderSP : adder generic map(32) port map(SP,valSP,SP_plus_one);
 
+SP_register : My_nDFF_SP generic map (32) port map (clk,rst,bo_em_controlSignals(5),SP_plus_one ,SP );
+
 -- Updating SP
-process(clk)
-begin 
-  if(rising_edge(clk) and bo_em_controlSignals(5) = '1') THEN -- Will be removed CU and be from buffer
-    SP <= SP_plus_one;
-  end if; 
-end process ; -- SPAssign
+-- process(clk)
+-- begin 
+--   if(rising_edge(clk) and bo_em_controlSignals(5) = '1') THEN -- Will be removed CU and be from buffer
+--     SP <= SP_plus_one;
+--   end if; 
+-- end process ; -- SPAssign
 
 
 
 -- check control signals
 -- SP is made at selector 1 not 0 as report 
-memorymux1 : mux2x1  generic map(32) port map(bo_em_aluOutput , SP, bo_em_controlSignals(5),Address_IP);
+memorymux1 : mux2x1  generic map(32) port map(bo_em_aluOutput , SP, bo_em_controlSignals(6),Address_IP);
 memorymux2 : mux2x1  generic map(32) port map(x"00000000", bo_em_readData1, bo_em_controlSignals(7),Data_IP);
 -- ZEROS WILL BE bo_em_PCNext
 

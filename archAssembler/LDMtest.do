@@ -16,3 +16,5 @@ mem load -filltype value -filldata 611E -fillradix hexadecimal /processor/instru
 mem load -filltype value -filldata 621E -fillradix hexadecimal /processor/instructionMemory/ram(6)
 mem load -filltype value -filldata 691E -fillradix hexadecimal /processor/instructionMemory/ram(7)
 mem load -filltype value -filldata 6A1E -fillradix hexadecimal /processor/instructionMemory/ram(8)
+mem load -filltype value -filldata 581E -fillradix hexadecimal /processor/instructionMemory/ram(9)
+mem load -filltype value -filldata 581E -fillradix hexadecimal /processor/instructionMemory/ram(10)

@@ -222,7 +222,43 @@ begin
         s_ccrEnable <= '0';
         s_wbEnable <= '1';
         s_wbSelector <= "01";
-    
+        -- LDD
+    elsif i_instruction = "11010" then
+        s_SPEnable <= '0';
+        s_memRead <= '1';
+        s_memWrite <= '0';
+        s_addSubSP <= '0';
+        s_ccrEnable <= '0';
+        s_wbEnable <= '1';
+        s_wbSelector <= "00";
+        
+        -- STD
+    elsif i_instruction = "11011" then
+        s_SPEnable <= '0';
+        s_memRead <= '0';
+        s_memWrite <= '1';
+        s_addSubSP <= '0';
+        s_ccrEnable <= '0';
+        s_wbEnable <= '0';
+        s_wbSelector <= "01";
+        -- PUSH
+    elsif i_instruction = "01100" then
+        s_SPEnable <= '1';
+        s_memRead <= '0';
+        s_memWrite <= '1';
+        s_addSubSP <= '0';
+        s_ccrEnable <= '0';
+        s_wbEnable <= '0';
+        s_wbSelector <= "01";
+        -- POP
+    elsif i_instruction = "01101" then
+        s_SPEnable <= '1';
+        s_memRead <= '1';
+        s_memWrite <= '0';
+        s_addSubSP <= '1';
+        s_ccrEnable <= '0';
+        s_wbEnable <= '1';
+        s_wbSelector <= "00";
     end if ;
     -- stuff that you have to write manually 
     

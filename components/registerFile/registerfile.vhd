@@ -73,7 +73,8 @@ begin
 --WRITE!!
 decoder0: My_3x8Decoder port map (write_address,write_address_decoded);
 
-decoded_Writeenable: write_address_decoded and write_enable ; 
+decoded_Writeenable <= write_address_decoded and (write_enable&write_enable&write_enable&write_enable&
+                                              write_enable&write_enable&write_enable&write_enable) ; 
 
 -- PORT MAPPING THE 8 Registers
 R0:My_nDFF_RegFile generic map(32) port map(CLK,decoded_Writeenable(0) ,write_register,R0_OUT);

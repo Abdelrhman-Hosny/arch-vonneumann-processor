@@ -558,12 +558,12 @@ OUT_PORT : My_nDFF_OUTPORT generic map(32) port map (bo_de_cuSignals(12), aluOpe
 -- end process ; -- valueDeciderForSP
 
 -- SP Adder
-valSP <= 2 when bo_em_controlSignals(5) = '1' else
+valSP <= 2 when bo_em_controlSignals(6) = '1' else
         -2 ;
 
 adderSP : adder generic map(32) port map(SP,valSP,SP_plus_one);
 
-SP_register : My_nDFF_SP generic map (32) port map (clk,rst,bo_em_controlSignals(5),SP_plus_one ,SP );
+SP_register : My_nDFF_SP generic map (32) port map (clk,'0',bo_em_controlSignals(5),SP_plus_one ,SP );
 
 -- Updating SP
 -- process(clk)
@@ -577,7 +577,7 @@ SP_register : My_nDFF_SP generic map (32) port map (clk,rst,bo_em_controlSignals
 
 -- check control signals
 -- SP is made at selector 1 not 0 as report 
-memorymux1 : mux2x1  generic map(32) port map(bo_em_aluOutput , SP, bo_em_controlSignals(6),Address_IP);
+memorymux1 : mux2x1  generic map(32) port map(bo_em_aluOutput , SP, bo_em_controlSignals(5),Address_IP);
 memorymux2 : mux2x1  generic map(32) port map(x"00000000", bo_em_readData1, bo_em_controlSignals(7),Data_IP);
 -- ZEROS WILL BE bo_em_PCNext
 

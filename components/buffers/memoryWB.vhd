@@ -25,7 +25,7 @@ Architecture a_memoryWB OF memoryWB IS
 BEGIN
 	process (clk)
 	begin
-        IF (rising_edge(clk) ) THEN
+        IF (falling_edge(clk) ) THEN
         o_aluData           <= i_aluData;
 		o_memoryData        <= i_memoryData;
         o_controlSignals    <= i_controlSignals;

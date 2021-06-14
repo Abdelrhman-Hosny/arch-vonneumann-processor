@@ -354,7 +354,23 @@ Signal SP : std_logic_vector(15 DOWNTO 0) := (others =>'0');
   -- second one 
     -- operands : PC+1 / ReadData1
     -- Output : its o/p will enter memory as Data I/P
+Signal Address_IP : std_logic_vector(15 DOWNTO 0) := (others =>'0');
+Signal Data_IP : std_logic_vector(31 DOWNTO 0) := (others =>'0');
 
+-- Data Memory 
+-- LITTLE_ENDIAN dataMemory
+Component dataMemory IS
+PORT (
+		CLK             : IN std_logic;
+        i_writeEnable   : IN std_logic;
+        i_readEnable    : IN std_logic;
+        i_address       : IN std_logic_vector(15 DOWNTO 0); -- depends onsize of memory 
+        i_writeData     : IN std_logic_vector(31 DOWNTO 0); -- same size as Register
+		    o_dataout       : OUT std_logic_vector(31 DOWNTO 0) -- same size as Register
+	  );
+END Component;
+
+Signal memoryData_OUT : std_logic_vector(31 DOWNTO 0) := (others =>'0');
 
 -------------------------------------------------------------------
 
@@ -542,6 +558,19 @@ begin
     SP <= SP_plus_one;
   end if; 
 end process ; -- SPAssign
+
+
+
+-- check control signals
+-- SP is made at selector 1 not 0 as report 
+memorymux1 : mux2x1  generic map(32) port map(bo_em_aluOutput , SP, bo_em_controlSignals(5),Address_IP);
+memorymux2 : mux2x1  generic map(32) port map(x"00000000", bo_em_readData1, bo_em_controlSignals(7),Data_IP);
+-- ZEROS WILL BE bo_em_PCNext
+
+-- check control signals
+datamemory0 : dataMemory port map(CLK , bo_em_controlSignals(3), bo_em_controlSignals(4),
+                                                Address_IP, Data_IP, memoryData_OUT);
+
 
 buffer_memWB : memoryWB port map( clk,
                                   -- inputs

@@ -23,7 +23,7 @@ entity hazardDetectionUnit is
     IFID_Rdst           : IN std_logic_vector(2 downto 0 );
     Stall_IF            : IN std_logic;
     Stall_ID            : IN std_logic
-) ;
+);
 end hazardDetectionUnit ;
 
 architecture arch of hazardDetectionUnit is

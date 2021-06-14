@@ -18,7 +18,7 @@ ARCHITECTURE dataMemory_a OF dataMemory IS
 -- SIZE WILL BE RELATIVE TO PC (NOW 16 BITS)
 --1/2 * 2^16 = 32768
 -- 1024 as program crash
-	TYPE dataMemory_type IS ARRAY(0 TO 1024) of std_logic_vector(15 DOWNTO 0); -- DataMemory is 16 bits
+	TYPE dataMemory_type IS ARRAY(0 TO 1048575) of std_logic_vector(15 DOWNTO 0); -- DataMemory is 16 bits
 	SIGNAL dataMemory : dataMemory_type ;
 BEGIN
     

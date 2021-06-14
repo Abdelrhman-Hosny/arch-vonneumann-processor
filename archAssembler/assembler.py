@@ -62,7 +62,7 @@ registerAddress = {
                 }
 # file name
 rootDir = 'arch-vonneumann-processor\\archAssembler\\'
-fileName= 'memory'
+fileName= 'ldStr'
 # instructions in the end
 instructions= []
 instructionsOrder = []

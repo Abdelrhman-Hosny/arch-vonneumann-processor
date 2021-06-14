@@ -14,6 +14,7 @@ entity decodeExecBuffer IS
         i_aluOPCode : IN std_logic_vector(3 downto 0);
         i_cuSignals : IN std_logic_vector(16 downto 0);
         i_immediate : IN std_logic_vector(31 downto 0);
+        i_isLoadStore : IN std_logic;
         -- output to buffer
         o_readData1         , o_readData2 : OUT std_logic_vector( 31 downto 0);
         o_readData1Address, o_readData2Address : OUT std_logic_vector(2 downto 0);
@@ -21,7 +22,8 @@ entity decodeExecBuffer IS
         o_PCNext                 : OUT std_logic_vector(15 downto 0 );
         o_aluOPCode               : OUT std_logic_vector(3 downto 0);
         o_cuSignals              : OUT std_logic_vector(16 downto 0);
-        o_immediate              : OUT std_logic_vector(31 downto 0)
+        o_immediate              : OUT std_logic_vector(31 downto 0);
+        o_isLoadStore : OUT std_logic
 		);
 END decodeExecBuffer;
 
@@ -39,7 +41,7 @@ BEGIN
         o_readData2 <= i_readData2    ;
         o_readData2Address <= i_readData2Address;
         o_aluOPCode <= i_aluOPCode;
-
+        o_isLoadStore <= i_isLoadStore;
 		END IF;
 	end process;
 end a_decodeExecBuffer;

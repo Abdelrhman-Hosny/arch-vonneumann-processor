@@ -45,6 +45,7 @@ port(
       i_aluOPCode : IN std_logic_vector(3 downto 0);
       i_cuSignals : IN std_logic_vector(16 downto 0);
       i_immediate : IN std_logic_vector(31 downto 0);
+      i_isLoadStore : IN std_logic;
       -- output to buffer
       o_readData1         , o_readData2 : OUT std_logic_vector( 31 downto 0);
       o_readData1Address, o_readData2Address : OUT std_logic_vector(2 downto 0);
@@ -52,7 +53,8 @@ port(
       o_PCNext                 : OUT std_logic_vector(15 downto 0 );
       o_aluOPCode               : OUT std_logic_vector(3 downto 0);
       o_cuSignals              : OUT std_logic_vector(16 downto 0);
-      o_immediate              : OUT std_logic_vector(31 downto 0)
+      o_immediate              : OUT std_logic_vector(31 downto 0);
+      o_isLoadStore            : OUT std_logic
 );
 
 end component;
@@ -63,6 +65,7 @@ signal bo_de_PCNext : std_logic_vector( 15 downto 0 );
 signal bo_de_cuSignals : std_logic_vector (16 downto 0)  := (others =>'0');
 signal bo_de_aluOPCode : std_logic_vector (3 downto 0);
 signal bo_de_immediate : std_logic_vector( 31 downto 0);
+signal bo_de_isLoadStore, bi_de_isLoadStore : std_logic;
 ------------------------------------
 -- EX MEM Buffer
 component execMemory
@@ -280,7 +283,7 @@ end Component ;
 -- Signals 
 Signal s_aluOutput : STD_LOGIC_VECTOR (31 downto 0);
 Signal s_aluCout   : STD_LOGIC;
-signal aluOperand1, aluOperand2, aluOperand2TempHolder :  STD_LOGIC_VECTOR (31 downto 0);
+signal aluOperand1, aluOperand2, aluOperand2TempHolder, aluOperand1Real :  STD_LOGIC_VECTOR (31 downto 0);
 signal s_aluCarryEnable : STD_LOGIC;
 signal s_aluZeroFlag    : STD_LOGIC;
 signal s_aluNegFlag     : STD_LOGIC;
@@ -470,7 +473,8 @@ bi_de_extendedImmediate <= std_logic_vector(resize( unsigned(bo_fd_immediate), 3
 
 
 controlUnitLabel : controlUnit port map(bo_fd_instruction(15 downto 11),s_outputControl);
-
+bi_de_isLoadStore <= '1' when bo_fd_instruction(15 downto 11) = "11010" or bo_fd_instruction(15 downto 11) = "11011" else
+                      '0'; 
 
 buffer_decodeExec: decodeExecBuffer port map(
   clk,
@@ -481,6 +485,7 @@ buffer_decodeExec: decodeExecBuffer port map(
   bo_fd_instruction(4 downto 1),
   s_outputControl,
   bi_de_extendedImmediate,
+  bi_de_isLoadStore,
   -- outputs
   bo_de_readData1, bo_de_readData2,
   bo_de_readData1Address, bo_de_readData2Address,
@@ -488,7 +493,8 @@ buffer_decodeExec: decodeExecBuffer port map(
   bo_de_PCNext,
   bo_de_aluOPCode,
   bo_de_cuSignals,
-  bo_de_immediate
+  bo_de_immediate,
+  bo_de_isLoadStore
 );
 
 -------------------------------------------------------------------
@@ -503,8 +509,9 @@ aluMux2 : mux4x1  generic map(32) port map(bo_de_readData2, bo_em_aluOutput, wbD
                                                                           -- with immediate or reg decider from cu
 
 aluMux3 : mux2x1  generic map(32) port map(aluOperand2TempHolder, bo_de_immediate, bo_de_cuSignals(11), aluOperand2);
+aluMux4: mux2x1  generic map(32) port map(aluOperand1, aluOperand2TempHolder, bo_de_isLoadStore, aluOperand1Real);
 aluLabel : ALU port map (
-                  aluOperand1, aluOperand2, s_aluOutput , bo_de_aluOPCode , s_aluCout,s_aluCarryEnable
+                  aluOperand1Real, aluOperand2, s_aluOutput , bo_de_aluOPCode , s_aluCout,s_aluCarryEnable
                   ,s_aluZeroFlag, s_aluNegFlag);
 
 
@@ -527,7 +534,7 @@ buffer_execMemory: execMemory port map( clk,
                                         -- inputs
                                         bi_em_alu_iport,
                                         bo_de_PCNext,
-                                        bo_de_readData1,
+                                        aluOperand1,
                                         bi_em_controlSignals,-- control signals
                                         bo_de_writeAddress1,
                                         -- outputs

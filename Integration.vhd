@@ -338,13 +338,13 @@ Signal OUTPORT_output : STD_LOGIC_VECTOR(31 downto 0);
     -- val will be -2 or 2 (will be adjusted before portmapping)
     --SP_plus_one will be O/P from Adders will be next sp and will update sp
     Signal valSP         : integer := 2; 
-    Signal SP_plus_one : std_logic_vector(15 DOWNTO 0);
+    Signal SP_plus_one : std_logic_vector(31 DOWNTO 0);
 
 -- SP Register will be same (My_nDFF_PC)
 -- SP REGISTER signals 
     -- operands : O/P from adderSP 
     -- SP : O/P from My_nDFF_PC 
-Signal SP : std_logic_vector(15 DOWNTO 0) := (others =>'0');
+Signal SP : std_logic_vector(31 DOWNTO 0) := (31=>'0',others =>'1' );
 
 
 -- we have 2 mux2x1 before Memory 
@@ -354,7 +354,7 @@ Signal SP : std_logic_vector(15 DOWNTO 0) := (others =>'0');
   -- second one 
     -- operands : PC+1 / ReadData1
     -- Output : its o/p will enter memory as Data I/P
-Signal Address_IP : std_logic_vector(15 DOWNTO 0) := (others =>'0');
+Signal Address_IP : std_logic_vector(31 DOWNTO 0) := (others =>'0');
 Signal Data_IP : std_logic_vector(31 DOWNTO 0) := (others =>'0');
 
 -- Data Memory 
@@ -364,7 +364,7 @@ PORT (
 		CLK             : IN std_logic;
         i_writeEnable   : IN std_logic;
         i_readEnable    : IN std_logic;
-        i_address       : IN std_logic_vector(15 DOWNTO 0); -- depends onsize of memory 
+        i_address       : IN std_logic_vector(31 DOWNTO 0); -- depends onsize of memory 
         i_writeData     : IN std_logic_vector(31 DOWNTO 0); -- same size as Register
 		    o_dataout       : OUT std_logic_vector(31 DOWNTO 0) -- same size as Register
 	  );
@@ -549,7 +549,7 @@ begin
 end process ; -- valueDeciderForSP
 
 -- SP Adder
-adderSP : adder generic map(16) port map(SP,valSP,SP_plus_one);
+adderSP : adder generic map(32) port map(SP,valSP,SP_plus_one);
 
 -- Updating SP
 process(clk)

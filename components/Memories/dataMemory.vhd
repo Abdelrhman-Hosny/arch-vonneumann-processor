@@ -8,7 +8,7 @@ PORT (
 		CLK             : IN std_logic;
         i_writeEnable   : IN std_logic;
         i_readEnable    : IN std_logic;
-        i_address       : IN std_logic_vector(15 DOWNTO 0); -- depends onsize of memory 
+        i_address       : IN std_logic_vector(31 DOWNTO 0); -- depends onsize of memory 
         i_writeData     : IN std_logic_vector(31 DOWNTO 0); -- same size as Register
 		o_dataout       : OUT std_logic_vector(31 DOWNTO 0) -- same size as Register
 	  );

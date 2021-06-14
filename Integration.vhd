@@ -98,19 +98,18 @@ signal bo_em_writeAddress1 : std_logic_vector(2 downto 0);
 -- MEM WB Buffer
 component memoryWB
 port(
-      clk                 : IN STD_LOGIC ; 
+  clk                 : IN STD_LOGIC ; 
   -- inputs to buffer
       i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
       i_memoryData        : IN STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
       i_controlSignals    : IN STD_LOGIC_VECTOR(2 downto 0);
       i_writeAddress      : IN STD_LOGIC_VECTOR(2 downto 0) ;
-      
       -- outputs 
       o_aluData           : OUT STD_LOGIC_VECTOR(31 downto 0) ;
       o_memoryData        : OUT STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
       o_controlSignals    : OUT STD_LOGIC_VECTOR(2 downto 0);
       o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0) 
-);
+  );
 end component;
 
 -- MEM WB Buffer
@@ -350,11 +349,11 @@ component My_nDFF_SP IS
   PORT(
         CLK,RST,W_Enable: IN STD_LOGIC ;
               D : IN STD_LOGIC_VECTOR(n-1 downto 0) ;
-              Q : OUT STD_LOGIC_VECTOR(n-1 downto 0):=(others=>'0')
+              Q : OUT STD_LOGIC_VECTOR(n-1 downto 0):= x"000003FE"
         );
 END component;
 
-Signal SP : std_logic_vector(31 DOWNTO 0) := (0=>'0',others =>'1' );
+Signal SP : std_logic_vector(31 DOWNTO 0) := x"000003FE";
 
 
 -- we have 2 mux2x1 before Memory 
@@ -381,6 +380,7 @@ PORT (
 END Component;
 
 Signal memoryData_OUT : std_logic_vector(31 DOWNTO 0) := (others =>'0');
+
 
 -------------------------------------------------------------------
 
@@ -574,12 +574,12 @@ SP_register : My_nDFF_SP generic map (32) port map (clk,'0',bo_em_controlSignals
 --   end if; 
 -- end process ; -- SPAssign
 
-tempSPsignal <= SP_plus_one when bo_em_controlSignals(6) = '1' else
-                SP;
+-- tempSPsignal <= SP_plus_one when bo_em_controlSignals(6) = '1' else
+--                 SP;
 
 -- check control signals
 -- SP is made at selector 1 not 0 as report 
-memorymux1 : mux2x1  generic map(32) port map(bo_em_aluOutput , tempSPsignal, bo_em_controlSignals(5),Address_IP);
+memorymux1 : mux2x1  generic map(32) port map(bo_em_aluOutput , SP, bo_em_controlSignals(5),Address_IP);
 memorymux2 : mux2x1  generic map(32) port map(x"00000000", bo_em_readData1, bo_em_controlSignals(7),Data_IP);
 -- ZEROS WILL BE bo_em_PCNext
 

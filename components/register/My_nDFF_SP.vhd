@@ -18,7 +18,7 @@ BEGIN
 	begin
 		IF( RST='1') THEN
 			Q<= x"000003FE";
-		ELSIF ( rising_edge(clk) and (W_Enable ='1')) THEN
+		ELSIF ( falling_edge(clk) and (W_Enable ='1')) THEN
 			Q<=D;
 		END IF;
 	end process;

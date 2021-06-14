@@ -25,11 +25,11 @@ BEGIN
     process( CLK,i_address,i_writeEnable,i_writeData )
     begin
         if falling_edge(CLK) and i_writeEnable ='1' then
-            dataMemory(to_integer(unsigned((i_address)))) <= i_writeData(15 downto 0);
-            dataMemory(to_integer(unsigned((i_address)))+1) <= i_writeData(31 downto 16);
+            dataMemory(to_integer(unsigned(( i_address(9 downto 0) )))) <= i_writeData(15 downto 0);
+            dataMemory(to_integer(unsigned(( i_address(9 downto 0) )))+1) <= i_writeData(31 downto 16);
         elsif i_readEnable='1' then -- since we read async 
-        o_dataout(15 downto 0) <= dataMemory(to_integer(unsigned((i_address))));
-        o_dataout(31 downto 16) <= dataMemory(to_integer(unsigned((i_address)))+1 );
+        o_dataout(15 downto 0) <= dataMemory(to_integer(unsigned((i_address (9 downto 0) ))));
+        o_dataout(31 downto 16) <= dataMemory(to_integer(unsigned((i_address (9 downto 0) )))+1 );
         end if;
     end process ;
 

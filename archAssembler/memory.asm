@@ -13,6 +13,8 @@ in R2        #R2=19 add 19 in R2
 in R3        #R3=FFFF
 in R4        #R4=F320
 LDM R1,5     #R1=5
+NOP
+NOP
 PUSH R1      #SP=FFFFFFFC,M[FFFFFFFE]=5
 PUSH R2      #SP=FFFFFFFA,M[FFFFFFFC]=19
 POP R1       #SP=FFFFFFFC,R1=19

@@ -344,7 +344,7 @@ Signal OUTPORT_output : STD_LOGIC_VECTOR(31 downto 0);
 -- SP REGISTER signals 
     -- operands : O/P from adderSP 
     -- SP : O/P from My_nDFF_PC 
-Signal SP : std_logic_vector(31 DOWNTO 0) := (31=>'0',others =>'1' );
+Signal SP : std_logic_vector(31 DOWNTO 0) := x"000FFFFE";
 
 
 -- we have 2 mux2x1 before Memory 
@@ -541,7 +541,7 @@ OUT_PORT : My_nDFF_OUTPORT generic map(32) port map (bo_de_cuSignals(12), aluOpe
 -- decide whether to add 2 or -2 based on instruction
 valueDeciderForSP : process(CLK)
 begin 
-    IF ( bo_em_controlSignals(5) = '1' ) THEN                 -- Will be removed CU and be from buffer
+    IF ( bo_em_controlSignals(6) = '1' ) THEN                 -- Will be removed CU and be from buffer
 			  valSP <= 2;
 	  ELSE
         valSP <= -2;
@@ -554,7 +554,7 @@ adderSP : adder generic map(32) port map(SP,valSP,SP_plus_one);
 -- Updating SP
 process(clk)
 begin 
-  if(rising_edge(clk) and bo_em_controlSignals(4) = '1') THEN -- Will be removed CU and be from buffer
+  if(rising_edge(clk) and bo_em_controlSignals(5) = '1') THEN -- Will be removed CU and be from buffer
     SP <= SP_plus_one;
   end if; 
 end process ; -- SPAssign
@@ -575,7 +575,7 @@ datamemory0 : dataMemory port map(CLK , bo_em_controlSignals(3), bo_em_controlSi
 buffer_memWB : memoryWB port map( clk,
                                   -- inputs
                                   bo_em_aluOutput,
-                                  x"00000000", -- memoryData
+                                  memoryData_OUT, -- memoryData
                                   bo_em_controlSignals(2 downto 0),
                                   bo_em_writeAddress1,
                                   -- outputs

@@ -213,8 +213,8 @@ begin
         s_wbEnable <= '0';
         s_wbSelector <= "10";
         --
-        -- MOV
-    elsif i_instruction = "10100" then
+        -- MOV and LDM
+    elsif i_instruction = "10100" OR i_instruction = "11001" then
         s_SPEnable <= '0';
         s_memRead <= '0';
         s_memWrite <= '0';
@@ -222,6 +222,7 @@ begin
         s_ccrEnable <= '0';
         s_wbEnable <= '1';
         s_wbSelector <= "01";
+    
     end if ;
     -- stuff that you have to write manually 
     

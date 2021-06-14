@@ -22,13 +22,18 @@ Signal s_input1 : STD_LOGIC_VECTOR (32 downto 0);
 Signal s_input2 : STD_LOGIC_VECTOR (32 downto 0);
 
 begin
-  s_input1 <= '0'& i_operand1 ;
-  s_input2 <= '0'& i_operand2 ;
+  s_input1 <= '0' & i_operand1 ;
+  s_input2 <= '0' & i_operand2 ;
   
-  s_tempOutput <= s_input1 AND s_input2 when i_opCode="0000" else
+  s_tempOutput <= 
+              -- AND
+              s_input1 AND s_input2 when i_opCode="0000" else
+              -- OR
               s_input1 OR s_input2 when i_opCode="0001" else
+              -- NOT
               NOT s_input1 when i_opCode="0010" else 
-              s_input2 when i_opCode="1001" else --MOV
+              --MOV
+              s_input2 when i_opCode="1001" else 
               -- DEC
               std_logic_vector(resize(unsigned(i_operand1),33) - resize(unsigned(std_logic_vector'(X"1")),33))
                when i_opCode="0011" else

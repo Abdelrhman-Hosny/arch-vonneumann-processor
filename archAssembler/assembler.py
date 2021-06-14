@@ -13,12 +13,12 @@ opToOpCodeReset = {
 opToOpCodeBranch = {
     'JZ': '10000', 'JN': '10001', 
     'JC': '10010', 'JMP': '10011', 
+    'RET': '01110','CALL': '01111',
 }
 opToOpCodeMemory = {
     'LDM': '11001', 'LDD': '11010', 
-    'STD': '11011', 'PUSH ': '01100', 
-    'POP': '01101', 'RET': '01110',
-    'CALL': '01111', 
+    'STD': '11011', 'PUSH': '01100', 
+    'POP': '01101', 
 }
 opToOpCodeTwoOperand = {
     'AND': '00000', 'OR': '00001',
@@ -41,7 +41,7 @@ opToAluOpCode = {
                 'INC': '0110', 'SHR': '0111',
                 'SHL': '1000', 'SETC': '1111',
                 'CLRC': '1111', 'NOP': '1111',
-                'PUSH ': '1111', 'POP': '1111',
+                'PUSH': '1111', 'POP': '1111',
                 'RET': '1111', 'CALL': '1111',
                 'JZ': '1111', 'JN': '1111',
                 'JC': '1111', 'JMP': '1111',
@@ -62,7 +62,7 @@ registerAddress = {
                 }
 # file name
 rootDir = 'arch-vonneumann-processor\\archAssembler\\'
-fileName= 'twoOperand'
+fileName= 'memory'
 # instructions in the end
 instructions= []
 instructionsOrder = []
@@ -125,17 +125,47 @@ with open(rootDir + fileName+ '.asm', 'r') as f:
                 instructions.append(bin(int('0x' + immediateTemp.lower(), 16)))
                 instructionsOrder.append(currentMemoryIndex)
                 currentMemoryIndex += 1
+        elif (lineArray[0] in opToOpCodeMemory.keys()):
+            # get alu op code and op code
+            opCodeTemp = opToOpCodeMemory[lineArray[0]]
+            aluOpCodeTemp = opToAluOpCode[lineArray[0]]
+            operationOperands = lineArray[1].split(',')
+            registerAddress1 = registerAddress[operationOperands[0]]
+            if ( lineArray[0] in ['POP', 'PUSH'] ):
+                instructions.append( opCodeTemp + registerAddress1 + '000' + aluOpCodeTemp + '0')
+            elif ( lineArray[0] in ['STD' , 'LDD'] ):
+                operandTwoComponents = operationOperands[1].split('(')
+                immediateTemp = operandTwoComponents[0]
+                registerAddress2 = registerAddress[operandTwoComponents[1][:-1]]
+                # add instruction to instructions list
+                instructions.append(opCodeTemp + registerAddress1 + registerAddress2 + aluOpCodeTemp + '0')
+                # add immediate
+                instructions.append(bin(int('0x' + immediateTemp.lower(), 16)))
+                # add instruction order and increment
+                instructionsOrder.append(currentMemoryIndex)
+                currentMemoryIndex += 1
+            elif ( lineArray[0] == 'LDM'):
                 
+                instructions.append( opCodeTemp + registerAddress1 + '000' + aluOpCodeTemp + '0')
+                immediateTemp = operationOperands[1]
+                # add immediate
+                instructions.append(bin(int('0x' + immediateTemp.lower(), 16)))
+                # add instruction order and increment
+                instructionsOrder.append(currentMemoryIndex)
+                currentMemoryIndex += 1
+
+
+
 
         else:
             # for the instruction after org
             instructions.append(bin(int('0x' + lineArray[0].lower(), 16)))
+
         instructionsOrder.append(currentMemoryIndex)
         # increment memroy address to write into after instruction
         if(currentMemoryIndex != None): currentMemoryIndex += 1
-            
+          
 instructionsHex = [ hex(int(i,2)).upper()[2:] for i in instructions ]
-
 
 
 with open(rootDir + fileName + '.do', 'w') as f:

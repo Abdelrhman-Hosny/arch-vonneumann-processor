@@ -242,7 +242,7 @@ begin
         s_wbEnable <= '0';
         s_wbSelector <= "01";
         -- PUSH
-    elsif i_instruction = "11011" then
+    elsif i_instruction = "01100" then
         s_SPEnable <= '1';
         s_memRead <= '0';
         s_memWrite <= '1';
@@ -251,7 +251,7 @@ begin
         s_wbEnable <= '0';
         s_wbSelector <= "01";
         -- POP
-    elsif i_instruction = "11011" then
+    elsif i_instruction = "01101" then
         s_SPEnable <= '1';
         s_memRead <= '1';
         s_memWrite <= '0';

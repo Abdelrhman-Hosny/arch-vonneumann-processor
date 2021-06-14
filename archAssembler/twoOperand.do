@@ -2,6 +2,24 @@ vsim -gui work.processor
 add wave -position insertpoint  \
 sim:/processor/CLK
 force -freeze sim:/processor/CLK 1 0, 0 {100 ps} -r 200
+add wave -position insertpoint  \
+sim:/processor/PC \
+sim:/processor/Instruction \
+sim:/processor/Immediate \
+sim:/processor/s_aluOutput \
+sim:/processor/aluOperand1 \
+sim:/processor/aluOperand2 \
+sim:/processor/IPPort_Input
+add wave -position insertpoint  \
+sim:/processor/bi_em_alu_iport
+add wave -position insertpoint  \
+sim:/processor/registerFileLabel/R1_OUT \
+sim:/processor/registerFileLabel/R2_OUT \
+sim:/processor/registerFileLabel/R3_OUT \
+sim:/processor/registerFileLabel/R4_OUT \
+sim:/processor/registerFileLabel/R5_OUT \
+sim:/processor/registerFileLabel/R6_OUT
+force -freeze sim:/processor/IPPort_Input 5 0
 mem load -filltype value -filldata 10 -fillradix hexadecimal /processor/instructionMemory/ram(0)
 mem load -filltype value -filldata 100 -fillradix hexadecimal /processor/instructionMemory/ram(2)
 mem load -filltype value -filldata B13E -fillradix hexadecimal /processor/instructionMemory/ram(16)

@@ -17,12 +17,12 @@ architecture arch of forwardingUnit is
 begin
 
     
-    o_aluOperand1Selector <=    "10"  when i_mw_writeBackSignal = '1' and i_de_readData1Address = i_mw_writeAddress else
-                                "01" when i_em_writeBackSignal = '1' and i_de_readData1Address = i_em_writeAddress else
+    o_aluOperand1Selector <=    "01" when i_em_writeBackSignal = '1' and i_de_readData1Address = i_em_writeAddress else  
+                                "10"  when i_mw_writeBackSignal = '1' and i_de_readData1Address = i_mw_writeAddress else
                                 "00";
 
-    o_aluOperand2Selector <=    "10"  when i_mw_writeBackSignal = '1' and i_de_readData2Address = i_mw_writeAddress else
-                                "01" when i_em_writeBackSignal = '1' and i_de_readData2Address = i_em_writeAddress else
+    o_aluOperand2Selector <=    "01" when i_em_writeBackSignal = '1' and i_de_readData2Address = i_em_writeAddress else
+                                "10"  when i_mw_writeBackSignal = '1' and i_de_readData2Address = i_mw_writeAddress else
                                 "00";
 
 

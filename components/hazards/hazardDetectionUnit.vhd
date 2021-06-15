@@ -20,14 +20,14 @@ entity hazardDetectionUnit is
     i_de_Rdst           : IN std_logic_vector(2 downto 0 );
     i_fd_Rsrc           : IN std_logic_vector(2 downto 0 );
     i_fd_Rdst           : IN std_logic_vector(2 downto 0 );
-    o_stall : OUT std_logic
+    o_stall             : OUT std_logic
 );
 end hazardDetectionUnit ;
 
 architecture arch of hazardDetectionUnit is
 
 begin
-  o_stall <= '1' when ( i_de_MemRead='1' and ( (i_de_Rdst == i_fd_Rsrc) or ( i_de_Rdst== i_fd_Rdst) ) ) else
+  o_stall <= '1' when ( i_de_MemRead='1' and ( (i_de_Rdst = i_fd_Rsrc) or ( i_de_Rdst = i_fd_Rdst) ) ) else
                 '0' ;
 
 end architecture ; -- arch

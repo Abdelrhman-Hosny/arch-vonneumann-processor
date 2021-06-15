@@ -222,7 +222,11 @@ Component controlUnit is
   ) ;
 end Component ;
 
-signal zeroControlSignal : std_logic_vector(17 downto 0) := "00010000000000000";
+signal zeroControlSignal : std_logic_vector(16 downto 0) := "00010000000000000";
+signal outputMuxControlSignal : std_logic_vector(16 downto 0);
+signal selectorControlSignal : std_logic;
+
+
 -- REGISTER FILE 
 Component registerfile is
     port (
@@ -464,13 +468,13 @@ adderPC : adder generic map(16) port map(PC,valPC,PC_plus_one);
 
 muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJumpAddress, uncondJumpAddress, pcSelector ,MuxPCOutput);
 
-registerPC : My_nDFF_PC generic map(16) port map (CLK,'0','1',MuxPCOutput,PC); -- '0','1' FOR NOW ONLY
+registerPC : My_nDFF_PC generic map(16) port map (CLK,'0',"not"(o_HDU_stall),MuxPCOutput,PC); -- '0','1' FOR NOW ONLY
 
 instructionMemory : ram port map (PC,Instruction,Immediate);
 
 buffer_fetchDecode : fetchDecode port map(clk, 
                                           Instruction, Immediate,PC_plus_one,
-                                          '1', '0',
+                                          "not"(o_HDU_stall), '0',
                                           bo_fd_instruction,bo_fd_immediate,bo_fd_PC_plus_one );
 -------------------------------------------------------------------
 
@@ -492,6 +496,13 @@ controlUnitLabel : controlUnit port map(bo_fd_instruction(15 downto 11),s_output
 bi_de_isLoadStore <= '1' when bo_fd_instruction(15 downto 11) = "11010" or bo_fd_instruction(15 downto 11) = "11011" else
                       '0'; 
 
+
+selectorControlSignal <= o_HDU_stall  ; --or will be replacing it soon  
+
+outputMuxControlSignal <= zeroControlSignal when selectorControlSignal='1' else
+                          s_outputControl; 
+
+
 buffer_decodeExec: decodeExecBuffer port map(
   clk,
   readData1,readData2,
@@ -499,7 +510,7 @@ buffer_decodeExec: decodeExecBuffer port map(
   bo_fd_instruction(10 downto 8), -- writeAddress1
   bo_fd_PC_plus_one,
   bo_fd_instruction(4 downto 1),
-  s_outputControl,
+  outputMuxControlSignal,
   bi_de_extendedImmediate,
   bi_de_isLoadStore,
   -- outputs
@@ -512,6 +523,7 @@ buffer_decodeExec: decodeExecBuffer port map(
   bo_de_immediate,
   bo_de_isLoadStore
 );
+
 
 -------------------------------------------------------------------
 
@@ -645,11 +657,13 @@ fwdUnit : forwardingUnit port map(
                   fwdUnit_alu1Selector, fwdUnit_alu2Selector
                   );
 
-end architecture ; -- arch
-
 -- HazardDetectionUnit
 
-HDU : hazardDetectionUnit port map (
+HDU0 : hazardDetectionUnit port map (
                                   bo_de_cuSignals(4),bo_de_readData1Address,
                                   bo_fd_instruction(10 downto 8),bo_fd_instruction(7 downto 5),
                                   o_HDU_stall);
+
+
+end architecture ; -- arch
+

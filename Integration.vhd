@@ -492,15 +492,17 @@ end process ; -- valueDeciderPC
 
 adderPC : adder generic map(32) port map(PC,valPC,PC_plus_one);
 
+uncondJumpAddress <= aluOperand1 ;
+condJumpAddress <= aluOperand1 ; 
 muxPC : mux4x1 generic map(32) port map(PC_plus_one, memory, condJumpAddress, uncondJumpAddress, pcSelector ,MuxPCOutput);
 
 registerPC : My_nDFF_PC generic map(32) port map (CLK,isReset,"not"(o_HDU_stall),MuxPCOutput,PC); -- '0','1' FOR NOW ONLY
 
 instructionMemory : ram port map (PC,Instruction,Immediate);
 
-fd_isFlush <= isReset or 
-                      (bo_de_cuSignals(14)='1') or 
-                      (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1');  
+fd_isFlush <= '1' when 
+        isReset='1' or bo_de_cuSignals(14)='1' or (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') else
+          '0'; 
                       
 
  buffer_fetchDecode : fetchDecode port map(clk, 
@@ -533,9 +535,10 @@ selectorControlSignal <= o_HDU_stall  ; --or will be replacing it soon
 outputMuxControlSignal <= zeroControlSignal when selectorControlSignal='1' else
                           s_outputControl; 
 
-de_isFlush <= isReset or 
+de_isFlush <='1' when  isReset='1' or 
                         (bo_de_cuSignals(14)='1') or 
-                        (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1');  
+                        (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') else
+              '0' ;
 
 buffer_decodeExec: decodeExecBuffer port map(
   clk,
@@ -585,8 +588,10 @@ FlagRegister : My_nDFF_CCR port map (bo_de_cuSignals(9),s_aluCarryEnable
                                       ,bo_de_cuSignals(15),bo_de_cuSignals(16));
 
 -- flag register mux  
-flagRegisterMux : mux4x1 generic map(1) port map(FlagRegisterOut(0),FlagRegisterOut(1),FlagRegisterOut(2),"0",
-                                                  bo_de_cuSignals(8 downto 7),jumpCondFlagOutput) ; 
+jumpCondFlagOutput <= FlagRegisterOut(0) when bo_de_cuSignals(8 downto 7) = "00" else
+                      FlagRegisterOut(1) when bo_de_cuSignals(8 downto 7) = "01" else
+                      FlagRegisterOut(2) when bo_de_cuSignals(8 downto 7) = "10" else
+                      '0';
                       -- 0 : CF / 1 :NF / 2 :ZF / 3 :00
 -- I/P PORT
 IP_PORT : My_nDFF_INPORT generic map(32) port map('0',IPPort_Input,IPPort_Output);

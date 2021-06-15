@@ -26,7 +26,7 @@ Architecture a_memoryWB OF memoryWB IS
 BEGIN
 	process (clk,i_isFlush)
 	begin
-        IF i_isFlush='1'       THEN
+        IF i_isFlush='1' and falling_edge(clk) THEN
         o_controlSignals<= "000" ;
         ELSIF (rising_edge(clk) ) THEN
         o_aluData           <= i_aluData;

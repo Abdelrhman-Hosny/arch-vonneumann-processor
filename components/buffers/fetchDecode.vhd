@@ -24,7 +24,7 @@ Architecture a_fetchDecode OF fetchDecode IS
 BEGIN
 	process (clk,i_F_Flush,i_enable)
 	begin
-        IF (i_F_Flush = '1') THEN -- flushing asyncronous ! 
+        IF (i_F_Flush = '1' and falling_edge(clk) ) THEN -- flushing asyncronous ! 
             o_Instruction(15 downto 11)<= "01011" ;
             o_immediate<= (others=>'0');
             o_PC_plus_one<= (others=>'0');

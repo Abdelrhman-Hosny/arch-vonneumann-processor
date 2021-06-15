@@ -7,6 +7,7 @@ entity decodeExecBuffer IS
 	PORT(
         clk                 : IN STD_LOGIC ; 
 		-- inputs to buffer
+        i_Flush             : IN STD_LOGIC ; 
         i_readData1, i_readData2 : IN std_logic_vector( 31 downto 0);
         i_readData1Address, i_readData2Address : IN std_logic_vector(2 downto 0);
         i_writeAddress1 : IN std_logic_vector( 2 downto 0);
@@ -29,9 +30,11 @@ END decodeExecBuffer;
 
 Architecture a_decodeExecBuffer OF decodeExecBuffer IS
 BEGIN
-	process (clk)
+	process (clk,i_Flush)
 	begin
-        IF (rising_edge(clk) ) THEN
+        IF i_Flush ='1' THEN 
+        o_cuSignals <= "00010000000000000";
+        ELSIF (rising_edge(clk) ) THEN
         o_readData1             <= i_readData1     ;   
         o_readData1Address      <= i_readData1Address;
         o_writeAddress1   <= i_writeAddress1   ;

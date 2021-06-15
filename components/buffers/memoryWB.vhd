@@ -5,7 +5,8 @@ use ieee.std_logic_1164.all;
 
 entity memoryWB IS
 	PORT(
-        clk                 : IN STD_LOGIC ; 
+        clk                 : IN STD_LOGIC ;
+        i_isFlush           : IN STD_LOGIC ;
 		-- inputs to buffer
         i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
 		i_memoryData        : IN STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
@@ -23,9 +24,11 @@ END memoryWB;
 
 Architecture a_memoryWB OF memoryWB IS
 BEGIN
-	process (clk)
+	process (clk,i_isFlush)
 	begin
-        IF (rising_edge(clk) ) THEN
+        IF i_isFlush='1'       THEN
+        o_controlSignals<= "000" ;
+        ELSIF (rising_edge(clk) ) THEN
         o_aluData           <= i_aluData;
 		o_memoryData        <= i_memoryData;
         o_controlSignals    <= i_controlSignals;

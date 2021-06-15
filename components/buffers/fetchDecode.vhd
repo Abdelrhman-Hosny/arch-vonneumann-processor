@@ -24,12 +24,11 @@ Architecture a_fetchDecode OF fetchDecode IS
 BEGIN
 	process (clk,i_F_Flush,i_enable)
 	begin
-        -- IF (i_F_Flush = '1') THEN -- flushing asyncronous ! 
-        --     o_Instruction<= (others=>'Z');
-        --     o_immediate<= (others=>'Z');
-        --     o_PC_plus_one<= (others=>'Z');
-		-- ELS
-        IF (rising_edge(clk) and i_enable='1') THEN
+        IF (i_F_Flush = '1') THEN -- flushing asyncronous ! 
+            o_Instruction(15 downto 11)<= "01011" ;
+            o_immediate<= (others=>'0');
+            o_PC_plus_one<= (others=>'0');
+		ELSIF (rising_edge(clk) and i_enable='1') THEN
             -- since when i_enable ='0'-> we need to stall (come from Hazard det) 
             o_Instruction<= i_Instruction;
             o_immediate<= i_immediate;

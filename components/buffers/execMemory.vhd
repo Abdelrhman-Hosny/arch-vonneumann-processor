@@ -6,6 +6,7 @@ use ieee.std_logic_1164.all;
 entity execMemory IS
 	PORT(
         clk                 : IN STD_LOGIC ; 
+        i_isFlush           : IN STD_LOGIC ;    
 		-- inputs to buffer
         i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
 		i_PC_plus_one       : IN STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
@@ -24,9 +25,11 @@ END execMemory;
 
 Architecture a_execMemory OF execMemory IS
 BEGIN
-	process (clk)
+	process (clk,i_isFlush)
 	begin
-        IF (rising_edge(clk) ) THEN
+        IF i_isFlush='1' THEN
+        o_controlSignals    <= "10000000";
+        ELSIF (rising_edge(clk) ) THEN
         o_aluData           <= i_aluData;
 		o_PC_plus_one       <= i_PC_plus_one;
         o_readData1         <= i_readData1;

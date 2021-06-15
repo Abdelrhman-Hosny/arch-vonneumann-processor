@@ -62,7 +62,7 @@ registerAddress = {
                 }
 # file name
 rootDir = 'arch-vonneumann-processor\\archAssembler\\'
-fileName= 'ldStr'
+fileName= 'reset'
 # instructions in the end
 instructions= []
 instructionsOrder = []
@@ -156,6 +156,11 @@ with open(rootDir + fileName+ '.asm', 'r') as f:
 
 
 
+        elif (lineArray[0] == 'RESET'):
+            # get alu op code and op code
+            opCodeTemp = opToOpCodeReset[lineArray[0]]
+            aluOpCodeTemp = opToAluOpCode[lineArray[0]]
+            instructions.append( opCodeTemp + '000' + '000' + aluOpCodeTemp + '0')
 
         else:
             # for the instruction after org

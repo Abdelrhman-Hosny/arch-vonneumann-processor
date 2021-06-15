@@ -9,14 +9,14 @@ entity fetchDecode IS
 		-- inputs to buffer
         i_Instruction : IN STD_LOGIC_VECTOR(15 downto 0) ;
 		i_immediate   : IN STD_LOGIC_VECTOR(15 downto 0);
-        i_PC_plus_one : IN STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
+        i_PC_plus_one : IN STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
         i_enable      : IN STD_LOGIC ;
         i_F_Flush     : IN STD_LOGIC ;
         
         -- outputs 
         o_Instruction : OUT STD_LOGIC_VECTOR(15 downto 0) ;
 		o_immediate   : OUT STD_LOGIC_VECTOR(15 downto 0);
-        o_PC_plus_one : OUT STD_LOGIC_VECTOR(15 downto 0 ) -- maybe can be changed
+        o_PC_plus_one : OUT STD_LOGIC_VECTOR(31 downto 0 ) -- maybe can be changed
 		);
 END fetchDecode;
 

@@ -349,6 +349,8 @@ END Component;
 
 -- Signals 
 Signal OUTPORT_output : STD_LOGIC_VECTOR(31 downto 0);
+
+Signal jumpCondFlagOutput : STD_LOGIC ; -- output of mux of flag register
 -------------------------------------------------------------------
 
 -- STAGE 4 COMPONENTS & SIGNALS
@@ -490,14 +492,18 @@ end process ; -- valueDeciderPC
 
 adderPC : adder generic map(32) port map(PC,valPC,PC_plus_one);
 
-muxPC : mux4x1 generic map(32) port map(PC_plus_one,memory, condJumpAddress, uncondJumpAddress, pcSelector ,MuxPCOutput);
+muxPC : mux4x1 generic map(32) port map(PC_plus_one, memory, condJumpAddress, uncondJumpAddress, pcSelector ,MuxPCOutput);
 
 registerPC : My_nDFF_PC generic map(32) port map (CLK,isReset,"not"(o_HDU_stall),MuxPCOutput,PC); -- '0','1' FOR NOW ONLY
 
 instructionMemory : ram port map (PC,Instruction,Immediate);
 
-fd_isFlush <= isReset ;   --or Flush signal  ; -- will be changed to be flush 
-buffer_fetchDecode : fetchDecode port map(clk, 
+fd_isFlush <= isReset or 
+                      (bo_de_cuSignals(14)='1') or 
+                      (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1');  
+                      
+
+ buffer_fetchDecode : fetchDecode port map(clk, 
                                           Instruction, Immediate,PC_plus_one,
                                           "not"(o_HDU_stall), fd_isFlush,  
                                           bo_fd_instruction,bo_fd_immediate,bo_fd_PC_plus_one );
@@ -527,7 +533,10 @@ selectorControlSignal <= o_HDU_stall  ; --or will be replacing it soon
 outputMuxControlSignal <= zeroControlSignal when selectorControlSignal='1' else
                           s_outputControl; 
 
-de_isFlush <= isReset;  -- will be ored with flush 
+de_isFlush <= isReset or 
+                        (bo_de_cuSignals(14)='1') or 
+                        (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1');  
+
 buffer_decodeExec: decodeExecBuffer port map(
   clk,
   de_isFlush,
@@ -575,6 +584,10 @@ FlagRegister : My_nDFF_CCR port map (bo_de_cuSignals(9),s_aluCarryEnable
                                       ,FlagRegisterOut
                                       ,bo_de_cuSignals(15),bo_de_cuSignals(16));
 
+-- flag register mux  
+flagRegisterMux : mux4x1 generic map(1) port map(FlagRegisterOut(0),FlagRegisterOut(1),FlagRegisterOut(2),"0",
+                                                  bo_de_cuSignals(8 downto 7),jumpCondFlagOutput) ; 
+                      -- 0 : CF / 1 :NF / 2 :ZF / 3 :00
 -- I/P PORT
 IP_PORT : My_nDFF_INPORT generic map(32) port map('0',IPPort_Input,IPPort_Output);
 
@@ -584,6 +597,13 @@ muxALU_IPport:  mux2x1 generic map(32) port map(s_aluOutput, IPPort_Output, bo_d
 bi_em_controlSignals <=  bo_de_cuSignals(13) & bo_de_cuSignals(6 downto 0);
 -- readData1, readData2 must be changed to be output from muxes 
 -- we just made it now for testing
+
+-- recognizing unconditional jump in stage 3 
+pcSelector <= "11" when bo_de_cuSignals(14)='1' else
+              "10" when bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1' else
+              "00"; 
+
+
 em_isFlush <= isReset ; -- maybe ored later
 buffer_execMemory: execMemory port map( clk,
                                         em_isFlush,

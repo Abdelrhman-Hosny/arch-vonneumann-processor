@@ -54,11 +54,11 @@ begin
                 shift_left(unsigned(i_operand1), to_integer(unsigned(i_operand2(4 downto 0))))
                 ) when i_opCode="1000" ; 
 
- 
+
 
 o_Cout <= s_tempOutput(32) when i_opCode="0100" or i_opCode="0100" else -- ADD/SUB
-          i_operand1(0)    when i_opCode="0111" else -- SHR
-          i_operand1(31)    when i_opCode="1000" else  -- SHL
+          i_operand1( (to_integer(unsigned(i_operand2(4 downto 0))) -1) mod 32 )    when i_opCode="0111" else -- SHR
+          i_operand1( (32 - to_integer(unsigned(i_operand2(4 downto 0)))) mod 32 )  when i_opCode="1000" else  -- SHL
           s_tempOutput(32) when i_opCode="0011" else -- DEC 
           s_tempOutput(32) when i_opCode="0110" ; -- INC 
 

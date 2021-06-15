@@ -222,7 +222,7 @@ Component controlUnit is
   ) ;
 end Component ;
 
-
+signal zeroControlSignal : std_logic_vector(17 downto 0) := "00010000000000000";
 -- REGISTER FILE 
 Component registerfile is
     port (

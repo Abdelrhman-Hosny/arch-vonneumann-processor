@@ -32,7 +32,7 @@ Architecture a_decodeExecBuffer OF decodeExecBuffer IS
 BEGIN
 	process (clk,i_Flush)
 	begin
-        IF i_Flush ='1' and falling_edge(clk) THEN 
+        IF i_Flush ='1' and rising_edge(clk) THEN 
         o_cuSignals <= "00010000000000000";
         ELSIF (rising_edge(clk) ) THEN
         o_readData1             <= i_readData1     ;   

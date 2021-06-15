@@ -327,9 +327,11 @@ signal bi_em_isJump_register : STD_LOGIC:='0';
 -- FLAG REGISTER
 component My_nDFF_CCR IS
             PORT(
+              CLK          : IN STD_LOGIC;
               CCR_Enable   : IN STD_LOGIC := '0'; -- CCR ENABLE : Enable for neg , zero (initialized with zero)
               Carry_Enable : IN STD_LOGIC := '0'; -- enable for carry flag only (initialized with zero)
-
+              jump_Enable  :IN STD_LOGIC;
+              Selector     : IN STD_LOGIC_VECTOR(1 downto 0);
               -- in ALU operations 
                   -- CCR_enable is opened directly each alu operation as they are changed in all alu operations
                   -- while carry_enable is opened only if operation change it 
@@ -597,7 +599,8 @@ aluLabel : ALU port map (
 
 
 FlagRegisterIn <= s_aluZeroFlag & s_aluNegFlag & s_aluCout ; 
-FlagRegister : My_nDFF_CCR port map (bo_de_cuSignals(9),s_aluCarryEnable
+FlagRegister : My_nDFF_CCR port map (CLK,bo_de_cuSignals(9),s_aluCarryEnable,
+                                      bo_de_cuSignals(10),bo_de_cuSignals(8 downto 7)
                                       ,FlagRegisterIn
                                       ,FlagRegisterOut
                                       ,bo_de_cuSignals(15),bo_de_cuSignals(16));

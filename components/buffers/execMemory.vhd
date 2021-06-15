@@ -29,7 +29,7 @@ Architecture a_execMemory OF execMemory IS
 BEGIN
 	process (clk,i_isFlush)
 	begin
-        IF i_isFlush='1' and falling_edge(clk) THEN
+        IF i_isFlush='1' and rising_edge(clk) THEN
         o_controlSignals    <= "10000000";
         ELSIF (rising_edge(clk) ) THEN
         o_aluData           <= i_aluData;

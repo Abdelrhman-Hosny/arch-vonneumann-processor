@@ -19,29 +19,31 @@ port(
 		-- inputs to buffer
         i_Instruction : IN STD_LOGIC_VECTOR(15 downto 0) ;
 		    i_immediate   : IN STD_LOGIC_VECTOR(15 downto 0);
-        i_PC_plus_one : IN STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
+        i_PC_plus_one : IN STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
         i_enable      : IN STD_LOGIC ;
         i_F_Flush     : IN STD_LOGIC ;
         
         -- outputs 
         o_Instruction : OUT STD_LOGIC_VECTOR(15 downto 0) ;
 	    	o_immediate   : OUT STD_LOGIC_VECTOR(15 downto 0);
-        o_PC_plus_one : OUT STD_LOGIC_VECTOR(15 downto 0 ) 
+        o_PC_plus_one : OUT STD_LOGIC_VECTOR(31 downto 0 ) 
 
 );
 end component;
 -- IF/ID Signals
-signal bo_fd_instruction, bo_fd_immediate, bo_fd_PC_plus_one : STD_LOGIC_VECTOR(15 downto 0) ;
+signal bo_fd_instruction, bo_fd_immediate: STD_LOGIC_VECTOR(15 downto 0) ;
+signal bo_fd_PC_plus_one :STD_LOGIC_VECTOR(31 downto 0) ;
 ----------------------------
 -- ID / EX 
 component decodeExecBuffer
 port(
       clk                 : IN STD_LOGIC ; 
       -- inputs to buffer
+      i_Flush             : IN STD_LOGIC ; 
       i_readData1, i_readData2 : IN std_logic_vector( 31 downto 0);
       i_readData1Address, i_readData2Address : IN std_logic_vector(2 downto 0);
       i_writeAddress1 : IN std_logic_vector( 2 downto 0);
-      i_PCNext : IN std_logic_vector(15 downto 0 );
+      i_PCNext : IN std_logic_vector(31 downto 0 );
       i_aluOPCode : IN std_logic_vector(3 downto 0);
       i_cuSignals : IN std_logic_vector(16 downto 0);
       i_immediate : IN std_logic_vector(31 downto 0);
@@ -50,7 +52,7 @@ port(
       o_readData1         , o_readData2 : OUT std_logic_vector( 31 downto 0);
       o_readData1Address, o_readData2Address : OUT std_logic_vector(2 downto 0);
       o_writeAddress1          : OUT std_logic_vector( 2 downto 0);
-      o_PCNext                 : OUT std_logic_vector(15 downto 0 );
+      o_PCNext                 : OUT std_logic_vector(31 downto 0 );
       o_aluOPCode               : OUT std_logic_vector(3 downto 0);
       o_cuSignals              : OUT std_logic_vector(16 downto 0);
       o_immediate              : OUT std_logic_vector(31 downto 0);
@@ -58,10 +60,12 @@ port(
 );
 
 end component;
+-- reset signal 
+signal de_isFlush : std_logic ; 
 -- ID EX Signals
 signal bo_de_readData1, bo_de_readData2 : std_logic_vector( 31 downto 0);
 signal bo_de_writeAddress1, bo_de_readData1Address , bo_de_readData2Address : std_logic_vector( 2 downto 0 );
-signal bo_de_PCNext : std_logic_vector( 15 downto 0 );
+signal bo_de_PCNext : std_logic_vector( 31 downto 0 );
 signal bo_de_cuSignals : std_logic_vector (16 downto 0)  := (others =>'0');
 signal bo_de_aluOPCode : std_logic_vector (3 downto 0);
 signal bo_de_immediate : std_logic_vector( 31 downto 0);
@@ -71,22 +75,26 @@ signal bo_de_isLoadStore, bi_de_isLoadStore : std_logic;
 component execMemory
 port(
   clk                 : IN STD_LOGIC ; 
+  i_isFlush           : IN STD_LOGIC ; 
+
 		-- inputs to buffer
         i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
-		    i_PC_plus_one       : IN STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
+		    i_PC_plus_one       : IN STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
         i_readData1         : IN STD_LOGIC_VECTOR(31 downto 0);
         i_controlSignals    : IN STD_LOGIC_VECTOR(7 downto 0);
         i_writeAddress      : IN STD_LOGIC_VECTOR(2 downto 0) ;
         
         -- outputs 
         o_aluData           : OUT STD_LOGIC_VECTOR(31 downto 0) ;
-		    o_PC_plus_one       : OUT STD_LOGIC_VECTOR(15 downto 0 ); -- maybe can be changed
+		    o_PC_plus_one       : OUT STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
         o_readData1         : OUT STD_LOGIC_VECTOR(31 downto 0);
         o_controlSignals    : OUT STD_LOGIC_VECTOR(7 downto 0);
         o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0)
 
 );
 end component;
+-- signal isFlush 
+signal em_isFlush : std_logic ;
 -- temp sp signal
 signal tempSPsignal : std_logic_vector(31 downto 0);
 -- EX MEM Signals
@@ -95,13 +103,14 @@ signal tempSPsignal : std_logic_vector(31 downto 0);
 signal bi_em_controlSignals, bo_em_controlSignals : std_logic_vector(7 downto 0)  := (others =>'0') ;
 
 signal bo_em_aluOutput, bo_em_readData1, bi_em_alu_iport : std_logic_vector(31 downto 0);
-signal bo_em_PCNext : std_logic_vector(15 downto 0);
+signal bo_em_PCNext : std_logic_vector(31 downto 0);
 signal bo_em_writeAddress1 : std_logic_vector(2 downto 0);
 ---------------------------
 -- MEM WB Buffer
 component memoryWB
 port(
   clk                 : IN STD_LOGIC ; 
+  i_isFlush           : IN STD_LOGIC ;
   -- inputs to buffer
       i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
       i_memoryData        : IN STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
@@ -115,6 +124,8 @@ port(
   );
 end component;
 
+-- is flush
+signal mw_isFlush : STD_LOGIC ;
 -- MEM WB Buffer
 signal bo_mw_aluData, bo_mw_memoryData : STD_LOGIC_VECTOR(31 downto 0);
 signal bo_mw_controlSignals, bo_mw_writeAddress : STD_LOGIC_VECTOR(2 downto 0)  := (others =>'0') ;
@@ -126,7 +137,7 @@ signal bo_mw_controlSignals, bo_mw_writeAddress : STD_LOGIC_VECTOR(2 downto 0)  
 Component ram IS
 PORT (  -- i removed clk since async read
 		-- will change later (acc to PC )
-		i_address : IN std_logic_vector(15 DOWNTO 0);
+		i_address : IN std_logic_vector(31 DOWNTO 0);
 		o_dataout : OUT std_logic_vector(15 DOWNTO 0);
 		o_immediate : OUT std_logic_vector(15 DOWNTO 0)
 	  );
@@ -144,7 +155,7 @@ end Component;
 
 -- PC Register 
 Component My_nDFF_PC IS
-	Generic (n: integer :=16);
+	Generic (n: integer :=32);
 	PORT(
 	  CLK,RST,W_Enable: IN STD_LOGIC ;
 					D : IN STD_LOGIC_VECTOR(n-1 downto 0) ;
@@ -171,7 +182,7 @@ end Component ;
     -- PC+1 will be O/P from Adders (pc+1 here mean next instruction not just +1)
     Signal valPC         : integer := 1; 
     -- initial value of PC_plus_one = 1 ->
-    Signal PC_plus_one : std_logic_vector(15 DOWNTO 0) := (others =>'0');
+    Signal PC_plus_one : std_logic_vector(31 DOWNTO 0) := (others =>'0');
 
 -- mux 2x1
   component mux2x1
@@ -199,8 +210,8 @@ end Component ;
 -- PC REGISTER signals 
     -- MUX OUTPUT : I/P to My_nDFF_PC
     -- PC : O/P from My_nDFF_PC 
-Signal MuxPCOutput : std_logic_vector(15 DOWNTO 0) := (others =>'0');
-Signal PC : std_logic_vector(15 DOWNTO 0) := (others =>'0');
+Signal MuxPCOutput : std_logic_vector(31 DOWNTO 0) := (others =>'0');
+Signal PC : std_logic_vector(31 DOWNTO 0) := (others =>'0');
 
 
 -- Output will be instruction that will be decoded next stage
@@ -209,6 +220,12 @@ Signal Instruction : std_logic_vector(15 DOWNTO 0); -- o_dataout
 -- we will need to extract data from PC+1 also (immediate)
 Signal Immediate : std_logic_vector(15 DOWNTO 0); -- o_immediate
 signal bi_de_extendedImmediate : std_logic_vector(31 downto 0 );
+
+
+--- Reset Intsruction
+signal isReset : std_logic := '0'; 
+
+signal fd_isFlush : std_logic := '0'; -- willbe or of isreset and flush from cu  
 
 -------------------------------------------------------------------
 
@@ -231,6 +248,7 @@ signal selectorControlSignal : std_logic;
 Component registerfile is
     port (
       CLK               : IN std_logic;
+      RST               : IN std_logic;
       write_enable      : IN std_logic;
   
       -- read addresses
@@ -352,7 +370,7 @@ Signal OUTPORT_output : STD_LOGIC_VECTOR(31 downto 0);
     -- operands : O/P from adderSP 
     -- SP : O/P from My_nDFF_PC 
 component My_nDFF_SP IS
-  Generic (n: integer :=16);
+  Generic (n: integer :=32);
   PORT(
         CLK,RST,W_Enable: IN STD_LOGIC ;
               D : IN STD_LOGIC_VECTOR(n-1 downto 0) ;
@@ -454,6 +472,12 @@ begin
 
 -- STAGE 1
 
+-- Reseting pc
+isReset <= '1' when Instruction(15 downto 11)="10111" else
+            '0';
+
+
+
 -- decide whether to add 1 or 2 based on instruction
 valueDeciderPC : process(Instruction)
 begin 
@@ -468,13 +492,14 @@ adderPC : adder generic map(16) port map(PC,valPC,PC_plus_one);
 
 muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJumpAddress, uncondJumpAddress, pcSelector ,MuxPCOutput);
 
-registerPC : My_nDFF_PC generic map(16) port map (CLK,'0',"not"(o_HDU_stall),MuxPCOutput,PC); -- '0','1' FOR NOW ONLY
+registerPC : My_nDFF_PC generic map(16) port map (CLK,isReset,"not"(o_HDU_stall),MuxPCOutput,PC); -- '0','1' FOR NOW ONLY
 
 instructionMemory : ram port map (PC,Instruction,Immediate);
 
+fd_isFlush <= isReset ;   --or Flush signal  ; -- will be changed to be flush 
 buffer_fetchDecode : fetchDecode port map(clk, 
                                           Instruction, Immediate,PC_plus_one,
-                                          "not"(o_HDU_stall), '0',
+                                          "not"(o_HDU_stall), fd_isFlush,  
                                           bo_fd_instruction,bo_fd_immediate,bo_fd_PC_plus_one );
 -------------------------------------------------------------------
 
@@ -482,7 +507,7 @@ buffer_fetchDecode : fetchDecode port map(clk,
 
 
 registerFileLabel : registerfile port map(
-  CLK,bo_mw_controlSignals(0),bo_fd_instruction(10 downto 8),bo_fd_instruction(7 downto 5),readData1,readData2,bo_mw_writeAddress,wbData
+  CLK,isReset,bo_mw_controlSignals(0),bo_fd_instruction(10 downto 8),bo_fd_instruction(7 downto 5),readData1,readData2,bo_mw_writeAddress,wbData
 );
 
 
@@ -502,9 +527,10 @@ selectorControlSignal <= o_HDU_stall  ; --or will be replacing it soon
 outputMuxControlSignal <= zeroControlSignal when selectorControlSignal='1' else
                           s_outputControl; 
 
-
+de_isFlush <= isReset;  -- will be ored with flush 
 buffer_decodeExec: decodeExecBuffer port map(
   clk,
+  de_isFlush,
   readData1,readData2,
   bo_fd_instruction(10 downto 8),bo_fd_instruction(7 downto 5), -- readAddress 1 and 2
   bo_fd_instruction(10 downto 8), -- writeAddress1
@@ -558,7 +584,9 @@ muxALU_IPport:  mux2x1 generic map(32) port map(s_aluOutput, IPPort_Output, bo_d
 bi_em_controlSignals <=  bo_de_cuSignals(13) & bo_de_cuSignals(6 downto 0);
 -- readData1, readData2 must be changed to be output from muxes 
 -- we just made it now for testing
+em_isFlush <= isReset ; -- maybe ored later
 buffer_execMemory: execMemory port map( clk,
+                                        em_isFlush,
                                         -- inputs
                                         bi_em_alu_iport,
                                         bo_de_PCNext,
@@ -623,7 +651,9 @@ datamemory0 : dataMemory port map(CLK , bo_em_controlSignals(3), bo_em_controlSi
                                                 Address_IP, Data_IP, memoryData_OUT);
 
 
+mw_isFlush <= isReset ; -- maybe ored later
 buffer_memWB : memoryWB port map( clk,
+                                  mw_isFlush,
                                   -- inputs
                                   bo_em_aluOutput,
                                   memoryData_OUT, -- memoryData

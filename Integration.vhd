@@ -518,7 +518,7 @@ registerPC : My_nDFF_PC generic map(32) port map (CLK,isReset,"not"(o_HDU_stall)
 instructionMemory : ram port map (PC,Instruction,Immediate);
 
 fd_isFlush <= '1' when 
-        isReset='1' or bo_de_cuSignals(14)='1' or (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') else
+        isReset='1' or bo_de_cuSignals(14)='1' or (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') or bo_de_cuSignals(13) = '0' else
           '0'; 
 
 
@@ -554,7 +554,8 @@ outputMuxControlSignal <= zeroControlSignal when selectorControlSignal='1' or bo
 
 de_isFlush <='1' when  isReset='1' or 
                         (bo_de_cuSignals(14)='1') or 
-                        (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') else
+                        (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') or 
+                        bo_de_cuSignals(13)='0' else
               '0' ;
 
 buffer_decodeExec: decodeExecBuffer port map(
@@ -622,11 +623,11 @@ bi_em_controlSignals <=  bo_de_cuSignals(13) & bo_de_cuSignals(6 downto 0);
 -- we just made it now for testing
 
 -- recognizing unconditional jump in stage 3 
-pcSelector <= "11" when bo_de_cuSignals(14)='1' else
+pcSelector <= "11" when bo_de_cuSignals(14)='1' or bo_de_cuSignals(13)='0' else
               "10" when bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1' else
               "00"; 
 
-bi_em_isJump_register <= '1' when  bo_de_cuSignals(14)='1' or (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') else
+bi_em_isJump_register <= '1' when  bo_de_cuSignals(14)='1' or (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') or bo_de_cuSignals(13)='0' else
                          '0'; 
 em_isFlush <= isReset ; -- maybe ored later
 buffer_execMemory: execMemory port map( clk,

@@ -37,26 +37,28 @@ signal bo_fd_PC_plus_one :STD_LOGIC_VECTOR(31 downto 0) ;
 -- ID / EX 
 component decodeExecBuffer
 port(
-      clk                 : IN STD_LOGIC ; 
-      -- inputs to buffer
-      i_Flush             : IN STD_LOGIC ; 
-      i_readData1, i_readData2 : IN std_logic_vector( 31 downto 0);
-      i_readData1Address, i_readData2Address : IN std_logic_vector(2 downto 0);
-      i_writeAddress1 : IN std_logic_vector( 2 downto 0);
-      i_PCNext : IN std_logic_vector(31 downto 0 );
-      i_aluOPCode : IN std_logic_vector(3 downto 0);
-      i_cuSignals : IN std_logic_vector(16 downto 0);
-      i_immediate : IN std_logic_vector(31 downto 0);
-      i_isLoadStore : IN std_logic;
-      -- output to buffer
-      o_readData1         , o_readData2 : OUT std_logic_vector( 31 downto 0);
-      o_readData1Address, o_readData2Address : OUT std_logic_vector(2 downto 0);
-      o_writeAddress1          : OUT std_logic_vector( 2 downto 0);
-      o_PCNext                 : OUT std_logic_vector(31 downto 0 );
-      o_aluOPCode               : OUT std_logic_vector(3 downto 0);
-      o_cuSignals              : OUT std_logic_vector(16 downto 0);
-      o_immediate              : OUT std_logic_vector(31 downto 0);
-      o_isLoadStore            : OUT std_logic
+  clk                 : IN STD_LOGIC ; 
+-- inputs to buffer
+    i_Flush             : IN STD_LOGIC ; 
+    i_isRET             : IN std_logic ;
+    i_readData1, i_readData2 : IN std_logic_vector( 31 downto 0);
+    i_readData1Address, i_readData2Address : IN std_logic_vector(2 downto 0);
+    i_writeAddress1 : IN std_logic_vector( 2 downto 0);
+    i_PCNext : IN std_logic_vector(31 downto 0 );
+    i_aluOPCode : IN std_logic_vector(3 downto 0);
+    i_cuSignals : IN std_logic_vector(16 downto 0);
+    i_immediate : IN std_logic_vector(31 downto 0);
+    i_isLoadStore : IN std_logic;
+    -- output to buffer
+    o_isRET             : OUT std_logic ;
+    o_readData1         , o_readData2 : OUT std_logic_vector( 31 downto 0);
+    o_readData1Address, o_readData2Address : OUT std_logic_vector(2 downto 0);
+    o_writeAddress1          : OUT std_logic_vector( 2 downto 0);
+    o_PCNext                 : OUT std_logic_vector(31 downto 0 );
+    o_aluOPCode               : OUT std_logic_vector(3 downto 0);
+    o_cuSignals              : OUT std_logic_vector(16 downto 0);
+    o_immediate              : OUT std_logic_vector(31 downto 0);
+    o_isLoadStore : OUT std_logic
 );
 
 end component;
@@ -74,24 +76,26 @@ signal bo_de_isLoadStore, bi_de_isLoadStore : std_logic;
 -- EX MEM Buffer
 component execMemory
 port(
+
   clk                 : IN STD_LOGIC ; 
   i_isFlush           : IN STD_LOGIC ; 
   i_isJump              :IN  STD_LOGIC ; 
-		-- inputs to buffer
-        i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
-		    i_PC_plus_one       : IN STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
-        i_readData1         : IN STD_LOGIC_VECTOR(31 downto 0);
-        i_controlSignals    : IN STD_LOGIC_VECTOR(7 downto 0);
-        i_writeAddress      : IN STD_LOGIC_VECTOR(2 downto 0) ;
-        
-        -- outputs 
-        o_aluData           : OUT STD_LOGIC_VECTOR(31 downto 0) ;
-		    o_PC_plus_one       : OUT STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
-        o_readData1         : OUT STD_LOGIC_VECTOR(31 downto 0);
-        o_controlSignals    : OUT STD_LOGIC_VECTOR(7 downto 0);
-        o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0);
-        o_isJump            : OUT  STD_LOGIC 
-
+      -- inputs to buffer
+      i_isRET             : IN std_logic;
+      i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
+          i_PC_plus_one       : IN STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
+      i_readData1         : IN STD_LOGIC_VECTOR(31 downto 0);
+      i_controlSignals    : IN STD_LOGIC_VECTOR(7 downto 0);
+      i_writeAddress      : IN STD_LOGIC_VECTOR(2 downto 0) ;
+      
+      -- outputs 
+      o_isRET             :out std_logic;
+      o_aluData           : OUT STD_LOGIC_VECTOR(31 downto 0) ;
+          o_PC_plus_one       : OUT STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
+      o_readData1         : OUT STD_LOGIC_VECTOR(31 downto 0);
+      o_controlSignals    : OUT STD_LOGIC_VECTOR(7 downto 0);
+      o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0);
+      o_isJump            : OUT  STD_LOGIC 
 );
 end component;
 -- signal isFlush 
@@ -282,11 +286,9 @@ end Component ;
 
 -- VERY IMPORTANT NOTE : When there's only 1 SRC USE Rscr2
 -- Rdst = Rsrc1 (replace it later if you need ,, i made it just for illustration for now) 
-
--- Outputs from register file (data read)
 Signal readData1 : std_logic_vector(31 DOWNTO 0);
 Signal readData2 : std_logic_vector(31 DOWNTO 0);
-
+signal bi_de_isRET, bo_de_isRET, bo_em_isRET : std_logic;
 -- Write_address will come from (WB)
 -- Write_register will come from (WB) as well 
 
@@ -511,14 +513,14 @@ uncondJumpAddress <= aluOperand1 ;
 condJumpAddress <= aluOperand1 ; 
 
 PCSelectorBuffer : My_nDFF_PCselector port map (clk,pcSelector,bo_PCselector);
-muxPC : mux4x1 generic map(32) port map(PC_plus_one, memory, condJumpAddress, uncondJumpAddress, bo_PCselector ,MuxPCOutput);
+muxPC : mux4x1 generic map(32) port map(PC_plus_one, memoryData_OUT, condJumpAddress, uncondJumpAddress, bo_PCselector ,MuxPCOutput);
 
 registerPC : My_nDFF_PC generic map(32) port map (CLK,isReset,"not"(o_HDU_stall),MuxPCOutput,PC); -- '0','1' FOR NOW ONLY
 
 instructionMemory : ram port map (PC,Instruction,Immediate);
 
 fd_isFlush <= '1' when 
-        isReset='1' or bo_de_cuSignals(14)='1' or (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') or bo_de_cuSignals(13) = '0' else
+        isReset='1' or bo_de_cuSignals(14)='1' or (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') or bo_de_cuSignals(13) = '0' or bo_em_isRET = '1' else
           '0'; 
 
 
@@ -555,12 +557,16 @@ outputMuxControlSignal <= zeroControlSignal when selectorControlSignal='1' or bo
 de_isFlush <='1' when  isReset='1' or 
                         (bo_de_cuSignals(14)='1') or 
                         (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') or 
-                        bo_de_cuSignals(13)='0' else
+                        bo_de_cuSignals(13)='0' or bo_em_isRET = '1' else
               '0' ;
+
+bi_de_isRET <= '1' when bo_fd_instruction(15 downto 11) = "01110"
+              else '0';
 
 buffer_decodeExec: decodeExecBuffer port map(
   clk,
   de_isFlush,
+  bi_de_isRET,
   readData1,readData2,
   bo_fd_instruction(10 downto 8),bo_fd_instruction(7 downto 5), -- readAddress 1 and 2
   bo_fd_instruction(10 downto 8), -- writeAddress1
@@ -570,6 +576,7 @@ buffer_decodeExec: decodeExecBuffer port map(
   bi_de_extendedImmediate,
   bi_de_isLoadStore,
   -- outputs
+  bo_de_isRET,
   bo_de_readData1, bo_de_readData2,
   bo_de_readData1Address, bo_de_readData2Address,
   bo_de_writeAddress1,
@@ -625,21 +632,24 @@ bi_em_controlSignals <=  bo_de_cuSignals(13) & bo_de_cuSignals(6 downto 0);
 -- recognizing unconditional jump in stage 3 
 pcSelector <= "11" when bo_de_cuSignals(14)='1' or bo_de_cuSignals(13)='0' else
               "10" when bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1' else
+              "01" when bo_em_isRET = '1' else
               "00"; 
 
-bi_em_isJump_register <= '1' when  bo_de_cuSignals(14)='1' or (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') or bo_de_cuSignals(13)='0' else
+bi_em_isJump_register <= '1' when  bo_de_cuSignals(14)='1' or (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') or bo_de_cuSignals(13)='0' or bo_em_isRET='1' else
                          '0'; 
 em_isFlush <= isReset ; -- maybe ored later
 buffer_execMemory: execMemory port map( clk,
                                         em_isFlush,
                                         bi_em_isJump_register,
                                         -- inputs
+                                        bo_de_isRET,
                                         bi_em_alu_iport,
                                         bo_de_PCNext,
                                         aluOperand1,
                                         bi_em_controlSignals,-- control signals
                                         bo_de_writeAddress1,
                                         -- outputs
+                                        bo_em_isRET,
                                         bo_em_aluOutput,
                                         bo_em_PCNext,
                                         bo_em_readData1,

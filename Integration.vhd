@@ -690,7 +690,7 @@ SP_register : My_nDFF_SP generic map (32) port map (clk,'0',bo_em_controlSignals
 -- check control signals
 -- SP is made at selector 1 not 0 as report 
 memorymux1 : mux2x1  generic map(32) port map(bo_em_aluOutput , SP, bo_em_controlSignals(5),Address_IP);
-memorymux2 : mux2x1  generic map(32) port map(x"00000000", bo_em_readData1, bo_em_controlSignals(7),Data_IP);
+memorymux2 : mux2x1  generic map(32) port map(bo_em_PCNext, bo_em_readData1, bo_em_controlSignals(7),Data_IP);
 -- ZEROS WILL BE bo_em_PCNext
 
 -- check control signals

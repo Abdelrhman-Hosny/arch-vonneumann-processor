@@ -164,7 +164,6 @@ with open(rootDir + fileName+ '.asm', 'r') as f:
             opCodeTemp = opToOpCodeBranch[lineArray[0]]
             aluOpCodeTemp = opToAluOpCode[lineArray[0]]
             if ( lineArray[0] == 'RET'):
-                continue
                 instructions.append(opCodeTemp + '000000' + aluOpCodeTemp + '0')
             else:
                 registerAddress1 = registerAddress[lineArray[1]]

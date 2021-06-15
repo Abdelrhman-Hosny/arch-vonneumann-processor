@@ -42,21 +42,21 @@ out R6
 #rti
 
 #check on load use
-#.ORG 200
-#SET C      #C-->1
-#POP R6     #R6=300, SP=FFFFFFFE
-#Call R6    #SP=FFFFFFFC, M[FFFFFFFE]=half next PC,M[FFFFFFFF]=other half next PC
-#INC R6	  #R6=401, this statement shouldn't be executed till call returns, C--> 0, N-->0,Z-->0
-#NOP
-#NOP
-#
-#
-#.ORG 300
-#Add R3,R6 #R6=400
-#Add R1,R2 #R1=80, C->0,N=0, Z=0
-#ret
-#SetC           #this shouldnot be executed
-#
+.ORG 200
+SETC      #C-->1
+POP R6     #R6=300, SP=FFFFFFFE
+Call R6    #SP=FFFFFFFC, M[FFFFFFFE]=half next PC,M[FFFFFFFF]=other half next PC
+INC R6	  #R6=401, this statement shouldn't be executed till call returns, C--> 0, N-->0,Z-->0
+NOP
+NOP
+
+
+.ORG 300
+Add R3,R6 #R6=400
+Add R1,R2 #R1=80, C->0,N=0, Z=0
+RET
+SetC           #this shouldnot be executed
+
 #.ORG 500
 #NOP
 #NOP

@@ -76,7 +76,7 @@ component execMemory
 port(
   clk                 : IN STD_LOGIC ; 
   i_isFlush           : IN STD_LOGIC ; 
-
+  i_isJump              :IN  STD_LOGIC ; 
 		-- inputs to buffer
         i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
 		    i_PC_plus_one       : IN STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
@@ -89,7 +89,8 @@ port(
 		    o_PC_plus_one       : OUT STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
         o_readData1         : OUT STD_LOGIC_VECTOR(31 downto 0);
         o_controlSignals    : OUT STD_LOGIC_VECTOR(7 downto 0);
-        o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0)
+        o_writeAddress      : OUT STD_LOGIC_VECTOR(2 downto 0);
+        o_isJump            : OUT  STD_LOGIC 
 
 );
 end component;
@@ -174,8 +175,17 @@ Component adder is
 end Component ;
 
 
---SIGNALS :
+Component My_nDFF_PCselector IS
+	Generic (n: integer :=2);
+	PORT(
+	  			CLK   : IN STD_LOGIC ;
+					D : IN STD_LOGIC_VECTOR(n-1 downto 0) ;
+					Q : OUT STD_LOGIC_VECTOR(n-1 downto 0):=(others=>'0')
+		);
+END Component;
 
+--SIGNALS :
+signal stallOrFlush :  STD_LOGIC ;
 -- Adder signals
     -- PC will be I/P to Adders
     -- valPC will be 1 or 2 (will be adjusted before portmapping)
@@ -200,7 +210,7 @@ end Component ;
     
     -- SELECTOR 
     Signal pcSelector : std_logic_vector(1 DOWNTO 0) := "00";
-    -- default is 00 to add 1 since we dont have the remaining operands
+    SIGNAL bo_PCselector : std_logic_vector(1 DOWNTO 0) := "00";
     
     -- input pc_plus_one
     Signal memory : std_logic_vector(31 DOWNTO 0);
@@ -309,6 +319,9 @@ signal aluOperand1, aluOperand2, aluOperand2TempHolder, aluOperand1Real :  STD_L
 signal s_aluCarryEnable : STD_LOGIC;
 signal s_aluZeroFlag    : STD_LOGIC;
 signal s_aluNegFlag     : STD_LOGIC;
+
+signal bo_em_isJump_register : STD_LOGIC:='0';
+signal bi_em_isJump_register : STD_LOGIC:='0';
 
 
 -- FLAG REGISTER
@@ -494,7 +507,9 @@ adderPC : adder generic map(32) port map(PC,valPC,PC_plus_one);
 
 uncondJumpAddress <= aluOperand1 ;
 condJumpAddress <= aluOperand1 ; 
-muxPC : mux4x1 generic map(32) port map(PC_plus_one, memory, condJumpAddress, uncondJumpAddress, pcSelector ,MuxPCOutput);
+
+PCSelectorBuffer : My_nDFF_PCselector port map (clk,pcSelector,bo_PCselector);
+muxPC : mux4x1 generic map(32) port map(PC_plus_one, memory, condJumpAddress, uncondJumpAddress, bo_PCselector ,MuxPCOutput);
 
 registerPC : My_nDFF_PC generic map(32) port map (CLK,isReset,"not"(o_HDU_stall),MuxPCOutput,PC); -- '0','1' FOR NOW ONLY
 
@@ -503,9 +518,9 @@ instructionMemory : ram port map (PC,Instruction,Immediate);
 fd_isFlush <= '1' when 
         isReset='1' or bo_de_cuSignals(14)='1' or (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') else
           '0'; 
-                      
 
- buffer_fetchDecode : fetchDecode port map(clk, 
+
+buffer_fetchDecode : fetchDecode port map(clk, 
                                           Instruction, Immediate,PC_plus_one,
                                           "not"(o_HDU_stall), fd_isFlush,  
                                           bo_fd_instruction,bo_fd_immediate,bo_fd_PC_plus_one );
@@ -532,7 +547,7 @@ bi_de_isLoadStore <= '1' when bo_fd_instruction(15 downto 11) = "11010" or bo_fd
 
 selectorControlSignal <= o_HDU_stall  ; --or will be replacing it soon  
 
-outputMuxControlSignal <= zeroControlSignal when selectorControlSignal='1' else
+outputMuxControlSignal <= zeroControlSignal when selectorControlSignal='1' or bo_em_isJump_register='1' else
                           s_outputControl; 
 
 de_isFlush <='1' when  isReset='1' or 
@@ -608,10 +623,12 @@ pcSelector <= "11" when bo_de_cuSignals(14)='1' else
               "10" when bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1' else
               "00"; 
 
-
+bi_em_isJump_register <= '1' when  bo_de_cuSignals(14)='1' or (bo_de_cuSignals(10)='1' and jumpCondFlagOutput='1') else
+                         '0'; 
 em_isFlush <= isReset ; -- maybe ored later
 buffer_execMemory: execMemory port map( clk,
                                         em_isFlush,
+                                        bi_em_isJump_register,
                                         -- inputs
                                         bi_em_alu_iport,
                                         bo_de_PCNext,
@@ -623,7 +640,8 @@ buffer_execMemory: execMemory port map( clk,
                                         bo_em_PCNext,
                                         bo_em_readData1,
                                         bo_em_controlSignals,
-                                        bo_em_writeAddress1
+                                        bo_em_writeAddress1,
+                                        bo_em_isJump_register
                                         );
 
 

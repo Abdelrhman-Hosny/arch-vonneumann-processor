@@ -9,6 +9,7 @@ entity execMemory IS
         i_isFlush           : IN STD_LOGIC ; 
         i_isJump              :IN  STD_LOGIC ; 
             -- inputs to buffer
+            i_isRET             : IN std_logic;
             i_aluData           : IN STD_LOGIC_VECTOR(31 downto 0) ;
                 i_PC_plus_one       : IN STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
             i_readData1         : IN STD_LOGIC_VECTOR(31 downto 0);
@@ -16,6 +17,7 @@ entity execMemory IS
             i_writeAddress      : IN STD_LOGIC_VECTOR(2 downto 0) ;
             
             -- outputs 
+            o_isRET             :out std_logic;
             o_aluData           : OUT STD_LOGIC_VECTOR(31 downto 0) ;
                 o_PC_plus_one       : OUT STD_LOGIC_VECTOR(31 downto 0 ); -- maybe can be changed
             o_readData1         : OUT STD_LOGIC_VECTOR(31 downto 0);
@@ -38,6 +40,7 @@ BEGIN
         o_controlSignals    <= i_controlSignals;
         o_writeAddress      <= i_writeAddress;
         o_isJump            <= i_isJump ;
+        o_isRET             <= i_isRET ;
 		END IF;
 	end process;
 end a_execMemory;

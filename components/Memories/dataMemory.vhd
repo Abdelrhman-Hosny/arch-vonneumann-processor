@@ -18,18 +18,18 @@ ARCHITECTURE dataMemory_a OF dataMemory IS
 -- SIZE WILL BE RELATIVE TO PC (NOW 16 BITS)
 --1/2 * 2^16 = 32768
 -- 1024 as program crash
-	TYPE dataMemory_type IS ARRAY(0 TO 1048575) of std_logic_vector(15 DOWNTO 0); -- DataMemory is 16 bits
+	TYPE dataMemory_type IS ARRAY(0 TO 1023) of std_logic_vector(15 DOWNTO 0); -- DataMemory is 16 bits
 	SIGNAL dataMemory : dataMemory_type ;
 BEGIN
     
     process( CLK,i_address,i_writeEnable,i_writeData )
     begin
-        if rising_edge(CLK) and i_writeEnable ='1' then
-            dataMemory(to_integer(unsigned((i_address)))) <= i_writeData(15 downto 0);
-            dataMemory(to_integer(unsigned((i_address)))+1) <= i_writeData(31 downto 16);
+        if falling_edge(CLK) and i_writeEnable ='1' then
+            dataMemory(to_integer(unsigned(( i_address(9 downto 0) )))) <= i_writeData(15 downto 0);
+            dataMemory(to_integer(unsigned(( i_address(9 downto 0) )))+1) <= i_writeData(31 downto 16);
         elsif i_readEnable='1' then -- since we read async 
-        o_dataout(15 downto 0) <= dataMemory(to_integer(unsigned((i_address))));
-        o_dataout(31 downto 16) <= dataMemory(to_integer(unsigned((i_address)))+1 );
+        o_dataout(15 downto 0) <= dataMemory(to_integer(unsigned((i_address (9 downto 0) ))));
+        o_dataout(31 downto 16) <= dataMemory(to_integer(unsigned((i_address (9 downto 0) )))+1 );
         end if;
     end process ;
 

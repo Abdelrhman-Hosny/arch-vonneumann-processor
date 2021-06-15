@@ -1,0 +1,5 @@
+.ORG 0 
+
+LDM R5,0
+LDD R2,0(R5)
+Add R2,R2

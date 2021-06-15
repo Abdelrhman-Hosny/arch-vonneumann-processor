@@ -11,9 +11,11 @@ use ieee.std_logic_1164.all;
 
 entity My_nDFF_CCR IS
         PORT(
+                CLK          : IN STD_LOGIC ;
                 CCR_Enable   : IN STD_LOGIC := '0'; -- CCR ENABLE : Enable for neg , zero (initialized with zero)
                 Carry_Enable : IN STD_LOGIC := '0'; -- enable for carry flag only (initialized with zero)
-
+                jump_Enable  :IN STD_LOGIC;
+                Selector     : IN STD_LOGIC_VECTOR(1 downto 0);
                 -- in ALU operations 
                     -- CCR_enable is opened directly each alu operation as they are changed in all alu operations
                     -- while carry_enable is opened only if operation change it 
@@ -31,15 +33,34 @@ END My_nDFF_CCR;
 Architecture a_nMY_DFF OF My_nDFF_CCR IS
 BEGIN
 
-    -- Carry set and reset 
-   
-        Q(0)<='1' when  carrySet='1' else
-              '0' when  carryReset='1' else
-              D(0) when (Carry_Enable = '1') ;    -- Carry Enables 
 
-    -- CCR Enables ( NEG / ZERO )
-        Q(2 downto 1) <= D(2 downto 1) when (CCR_Enable ='1');
+    -- writing sync
+        process(clk,carrySet,carryReset)
+        begin
+            if(rising_edge(clk) and (jump_Enable ='1')) then
+                if (Selector="00") then
+                    Q(0) <= '0';
+                elsif (Selector="01") then
+                    Q(1) <= '0';
+                elsif (Selector="10") then
+                    Q(2) <= '0';
+                end if;
+            elsif(rising_edge(clk)) then
+                if(  CCR_Enable ='1' ) then    
+                    Q(2 downto 1) <= D(2 downto 1); --write both in same time 
+                end if ;
+                if( Carry_Enable = '1') then
+                    Q(0) <= D(0);
+                end if;
+            end if ;
 
+            if(carrySet='1') then
+                Q(0) <= '1';
+            elsif (carryReset='1') then
+                Q(0) <= '0';
+            end if;
+            
+        end process;
 
 
 end a_nMY_DFF;

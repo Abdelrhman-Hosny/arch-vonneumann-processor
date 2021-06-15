@@ -13,27 +13,21 @@ use ieee.std_logic_1164.all;
 -- #fetching next instruction and IF/ID_BUFFER.
 -- Stall ID # will pass zeros to the cu signals at decode stage
 -- }
-
+-- in hazard detection, we only stall first and second stages
 entity hazardDetectionUnit is
   port (
-    IDEX_MemRead        : IN std_logic;
-    IDEX_Rdst           : IN std_logic_vector(2 downto 0 );
-    IFID_Rsrc           : IN std_logic_vector(2 downto 0 );
-    IDEX_Rdst           : IN std_logic_vector(2 downto 0 );
-    IFID_Rdst           : IN std_logic_vector(2 downto 0 );
-    Stall_IF            : IN std_logic;
-    Stall_ID            : IN std_logic
+    i_de_MemRead        : IN std_logic;
+    i_de_Rdst           : IN std_logic_vector(2 downto 0 );
+    i_fd_Rsrc           : IN std_logic_vector(2 downto 0 );
+    i_fd_Rdst           : IN std_logic_vector(2 downto 0 );
+    o_stall             : OUT std_logic
 );
 end hazardDetectionUnit ;
 
 architecture arch of hazardDetectionUnit is
 
 begin
-    Stall_IF <= '1' when ( IDEX_MemRead='1' and ( (IDEX_Rdst == IFID_Rsrc) or ( IDEX_Rdst== IFID_Rdst) ) ) else
-                '0' ;
-
-
-    Stall_ID <= '1' when ( IDEX_MemRead='1' and ( (IDEX_Rdst == IFID_Rsrc) or ( IDEX_Rdst== IFID_Rdst) ) ) else
+  o_stall <= '1' when ( i_de_MemRead='1' and ( (i_de_Rdst = i_fd_Rsrc) or ( i_de_Rdst = i_fd_Rdst) ) ) else
                 '0' ;
 
 end architecture ; -- arch

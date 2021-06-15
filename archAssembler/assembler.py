@@ -61,8 +61,8 @@ registerAddress = {
                 'R7' : '111' 
                 }
 # file name
-rootDir = 'arch-vonneumann-processor\\archAssembler\\'
-fileName= 'memory'
+rootDir = 'E:\\4th Semester CCE\\Computer Architecture\\Project\\arch-vonneumann-processor\\archAssembler\\'
+fileName= 'branch'
 # instructions in the end
 instructions= []
 instructionsOrder = []
@@ -154,8 +154,20 @@ with open(rootDir + fileName+ '.asm', 'r') as f:
                 instructionsOrder.append(currentMemoryIndex)
                 currentMemoryIndex += 1
 
-
-
+        elif (lineArray[0] == 'RESET'):
+            # get alu op code and op code
+            opCodeTemp = opToOpCodeReset[lineArray[0]]
+            aluOpCodeTemp = opToAluOpCode[lineArray[0]]
+            instructions.append( opCodeTemp + '000' + '000' + aluOpCodeTemp + '0')
+        
+        elif (lineArray[0] in opToOpCodeBranch.keys()):
+            opCodeTemp = opToOpCodeBranch[lineArray[0]]
+            aluOpCodeTemp = opToAluOpCode[lineArray[0]]
+            if ( lineArray[0] == 'RET'):
+                instructions.append(opCodeTemp + '000000' + aluOpCodeTemp + '0')
+            else:
+                registerAddress1 = registerAddress[lineArray[1]]
+                instructions.append(opCodeTemp + registerAddress1 + '000' + aluOpCodeTemp + '0')
 
         else:
             # for the instruction after org

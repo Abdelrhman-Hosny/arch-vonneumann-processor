@@ -203,9 +203,9 @@ end Component ;
     -- default is 00 to add 1 since we dont have the remaining operands
     
     -- input pc_plus_one
-    Signal memory : std_logic_vector(15 DOWNTO 0);
-    Signal condJumpAddress : std_logic_vector(15 DOWNTO 0);
-    Signal uncondJumpAddress : std_logic_vector(15 DOWNTO 0);
+    Signal memory : std_logic_vector(31 DOWNTO 0);
+    Signal condJumpAddress : std_logic_vector(31 DOWNTO 0);
+    Signal uncondJumpAddress : std_logic_vector(31 DOWNTO 0);
     
 -- PC REGISTER signals 
     -- MUX OUTPUT : I/P to My_nDFF_PC
@@ -488,11 +488,11 @@ valPC <= 1;
 END IF;
 end process ; -- valueDeciderPC
 
-adderPC : adder generic map(16) port map(PC,valPC,PC_plus_one);
+adderPC : adder generic map(32) port map(PC,valPC,PC_plus_one);
 
-muxPC : mux4x1 generic map(16) port map(PC_plus_one,memory, condJumpAddress, uncondJumpAddress, pcSelector ,MuxPCOutput);
+muxPC : mux4x1 generic map(32) port map(PC_plus_one,memory, condJumpAddress, uncondJumpAddress, pcSelector ,MuxPCOutput);
 
-registerPC : My_nDFF_PC generic map(16) port map (CLK,isReset,"not"(o_HDU_stall),MuxPCOutput,PC); -- '0','1' FOR NOW ONLY
+registerPC : My_nDFF_PC generic map(32) port map (CLK,isReset,"not"(o_HDU_stall),MuxPCOutput,PC); -- '0','1' FOR NOW ONLY
 
 instructionMemory : ram port map (PC,Instruction,Immediate);
 

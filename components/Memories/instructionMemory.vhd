@@ -7,7 +7,7 @@ PORT (  -- i removed clk since async read
         -- removed we and writing part since its read only (InstructionMemory)
 		-- assuming pc is 16 bit 
 		-- maybe will be changed later
-		i_address : IN std_logic_vector(15 DOWNTO 0); -- same size as PC
+		i_address : IN std_logic_vector(31 DOWNTO 0); -- same size as PC
 		o_dataout : OUT std_logic_vector(15 DOWNTO 0);
 		o_immediate : OUT std_logic_vector(15 DOWNTO 0)
 	  );

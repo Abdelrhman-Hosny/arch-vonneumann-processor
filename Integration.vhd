@@ -429,6 +429,22 @@ end component;
 signal fwdUnit_alu1Selector, fwdUnit_alu2Selector : std_logic_vector( 1 downto 0);
 
 
+-- Hazard Detection Unit 
+
+
+component hazardDetectionUnit is
+  port (
+    i_de_MemRead        : IN std_logic;
+    i_de_Rdst           : IN std_logic_vector(2 downto 0 );
+    i_fd_Rsrc           : IN std_logic_vector(2 downto 0 );
+    i_fd_Rdst           : IN std_logic_vector(2 downto 0 );
+    o_stall             : OUT std_logic
+);
+end component ;
+
+-- signals  
+signal o_HDU_stall :  std_logic ; 
+
 begin
 
 
@@ -630,3 +646,10 @@ fwdUnit : forwardingUnit port map(
                   );
 
 end architecture ; -- arch
+
+-- HazardDetectionUnit
+
+HDU : hazardDetectionUnit port map (
+                                  bo_de_cuSignals(4),bo_de_readData1Address,
+                                  bo_fd_instruction(10 downto 8),bo_fd_instruction(7 downto 5),
+                                  o_HDU_stall);

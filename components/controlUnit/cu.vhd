@@ -259,6 +259,15 @@ begin
         s_ccrEnable <= '0';
         s_wbEnable <= '1';
         s_wbSelector <= "00";
+        --RET
+    elsif i_instruction = "01110" then
+        s_SPEnable <= '1';
+        s_memRead <= '1';
+        s_memWrite <= '0';
+        s_addSubSP <= '1';
+        s_ccrEnable <= '0';
+        s_wbEnable <= '0';
+        s_wbSelector <= "00";
     end if ;
     -- stuff that you have to write manually 
     

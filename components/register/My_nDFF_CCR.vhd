@@ -33,13 +33,9 @@ END My_nDFF_CCR;
 Architecture a_nMY_DFF OF My_nDFF_CCR IS
 BEGIN
 
-    -- Carry set and reset async
-   
-        Q(0)<='1' when  carrySet='1' else
-              '0' when  carryReset='1';
 
     -- writing sync
-        process(clk)
+        process(clk,carrySet,carryReset)
         begin
             if(rising_edge(clk) and (jump_Enable ='1')) then
                 if (Selector="00") then
@@ -49,14 +45,21 @@ BEGIN
                 elsif (Selector="10") then
                     Q(2) <= '0';
                 end if;
-            else 
-                if(rising_edge(clk) and (CCR_Enable ='1') ) then
+            elsif(rising_edge(clk)) then
+                if(  CCR_Enable ='1' ) then    
                     Q(2 downto 1) <= D(2 downto 1); --write both in same time 
-                end if;
-                if (rising_edge(clk) and (Carry_Enable = '1') )then
+                end if ;
+                if( Carry_Enable = '1') then
                     Q(0) <= D(0);
                 end if;
             end if ;
+
+            if(carrySet='1') then
+                Q(0) <= '1';
+            elsif (carryReset='1') then
+                Q(0) <= '0';
+            end if;
+            
         end process;
 
 
